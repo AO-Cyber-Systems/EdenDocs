@@ -72,13 +72,31 @@ Which objectives cover which requirements. Updated during roadmap creation.
 
 | Requirement | Objective | Status |
 |-------------|-----------|--------|
-| (populated by roadmapper) | | |
+| BUILD-01 | Objective 1 - From-Source Build Pipeline | Pending |
+| BUILD-02 | Objective 1 - From-Source Build Pipeline | Pending |
+| BUILD-03 | Objective 1 - From-Source Build Pipeline | Pending |
+| BUILD-04 | Objective 1 - From-Source Build Pipeline | Pending |
+| BRAND-01 | Objective 2 - EdenDocs Rebrand of the Web UI | Pending |
+| BRAND-02 | Objective 2 - EdenDocs Rebrand of the Web UI | Pending |
+| BRAND-03 | Objective 2 - EdenDocs Rebrand of the Web UI | Pending |
+| BRAND-04 | Objective 2 - EdenDocs Rebrand of the Web UI | Pending |
+| BRAND-05 | Objective 2 - EdenDocs Rebrand of the Web UI | Pending |
+| BRAND-06 | Objective 2 - EdenDocs Rebrand of the Web UI | Pending |
+| AUTH-01 | Objective 3 - AOID Authentication Integration (OIDC) | Pending |
+| AUTH-02 | Objective 3 - AOID Authentication Integration (OIDC) | Pending |
+| AUTH-03 | Objective 3 - AOID Authentication Integration (OIDC) | Pending |
+| AUTH-04 | Objective 3 - AOID Authentication Integration (OIDC) | Pending |
+| DIST-01 | Objective 4 - EdenDocs-Branded Container Images | Pending |
+| DIST-02 | Objective 4 - EdenDocs-Branded Container Images | Pending |
+| DIST-03 | Objective 4 - EdenDocs-Branded Container Images | Pending |
+| UPST-01 | Objective 5 - Upstream Tracking Workflow | Pending |
+| UPST-02 | Objective 5 - Upstream Tracking Workflow | Pending |
 
 **Coverage:**
 - v1 requirements: 19 total
-- Mapped to objectives: 0
-- Unmapped: 19 ⚠️
+- Mapped to objectives: 19
+- Unmapped: 0 ✓
 
 ---
 *Requirements defined: 2026-07-07*
-*Last updated: 2026-07-07 after initial definition*
+*Last updated: 2026-07-07 after roadmap creation (5 objectives, full coverage)*
