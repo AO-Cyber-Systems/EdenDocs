@@ -14,9 +14,7 @@
 # assertion in scripts/eden/build.sh). This script does not attempt to
 # fetch or verify POCO — that is build-deps.sh's job.
 #
-# HARD PROJECT RULE: never use, bind, curl, or reference port 8080 for
-# anything. This script does not touch any port; noted here for grep
-# auditability.
+# This script does not bind or reference any network port.
 #
 set -euo pipefail
 
