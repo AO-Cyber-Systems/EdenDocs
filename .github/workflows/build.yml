@@ -1,0 +1,55 @@
+name: build
+on:
+  push:
+    branches: [eden-main]
+  workflow_dispatch:
+
+concurrency:
+  group: build-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    env:
+      CCACHE_DIR: /home/runner/.ccache
+    steps:
+      - uses: actions/checkout@v4
+
+      # BUILD-03: Node 20 LTS pinned — ubuntu-latest no longer ships Node 20
+      # in its toolcache (removed 2026-05-26; default is 22.x).
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Verify Node 20
+        run: node -v | grep -E '^v20\.'
+
+      # BUILD-03: ccache persisted across runs. CCACHE_DIR is set job-wide so
+      # ccache (XDG default would be ~/.cache/ccache) and this path agree.
+      - name: Restore ccache
+        uses: actions/cache@v4
+        with:
+          path: /home/runner/.ccache
+          key: ccache-${{ runner.os }}-${{ hashFiles('configure.ac') }}
+          restore-keys: |
+            ccache-${{ runner.os }}-
+
+      - name: Install build dependencies + system POCO 1.12.5p2
+        run: ./scripts/eden/build-deps.sh
+
+      - name: Configure ccache
+        run: ccache -M 1G && ccache -z
+
+      - name: Fetch prebuilt engine assets (BUILD-01 fast path, no engine/ compile)
+        run: ./scripts/eden/fetch-engine-assets.sh
+
+      - name: Configure and build (asserts system-POCO fallback — BUILD-02)
+        run: ./scripts/eden/build.sh
+
+      - name: ccache stats
+        run: ccache -s
+
+      # BUILD-04: native port 9980 — port 8080 is banned project-wide.
+      - name: Smoke test /hosting/discovery + /hosting/capabilities on 9980
+        run: ./scripts/eden/smoke-test.sh
