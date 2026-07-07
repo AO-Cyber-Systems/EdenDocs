@@ -1,0 +1,16 @@
+name: EdenDocs
+id: ari:cloud:compass:53f8835e-3a18-4994-a3e1-d88c2018a416:component/546e2675-3811-412b-8126-f0637fd7307c/7b0a03c5-1247-4e90-8c37-3f426ba34dfc
+description: EdenDocs — Eden Productivity document suite (fork of Collabora Online)
+configVersion: 1
+typeId: SERVICE
+fields:
+  tier: 4
+links:
+  - name: null
+    type: REPOSITORY
+    url: https://github.com/AO-Cyber-Systems/EdenDocs
+relationships:
+  DEPENDS_ON: []
+labels:
+  - source:github
+customFields: null
