@@ -2,6 +2,7 @@
 kind: app
 github_repo: AO-Cyber-Systems/EdenDocs
 org_project: PVT_kwDODwqLrc4BRsOP
+org: AO-Cyber-Systems
 ---
 
 # EdenDocs

@@ -10,11 +10,11 @@ See: .planning/PROJECT.md (updated 2026-07-07)
 ## Current Position
 
 Objective: 1 of 5 (From-Source Build Pipeline)
-Job: TBD (not yet planned)
-Status: Ready to plan
-Last activity: 2026-07-07 — Roadmap created (5 objectives, 19/19 v1 requirements mapped)
+Job: 01-01 complete (build scripts); next 01-02 (CI workflow)
+Status: Executing — wave 1 of 3 complete
+Last activity: 2026-07-07 — Wave 1 done: scripts/eden/{fetch-engine-assets,build-deps,build,smoke-test}.sh created (4 atomic commits); BUILD-02 re-validated live (tarball is instdir-only, 0 poco/workdir entries → system-POCO fallback required and asserted in build.sh)
 
-Progress: [░░░░░░░░░░] 0%
+Progress: [█░░░░░░░░░] 7%
 
 ## Accumulated Context
 
