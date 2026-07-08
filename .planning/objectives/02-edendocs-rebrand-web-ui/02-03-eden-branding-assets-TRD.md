@@ -258,7 +258,7 @@ Commit all six files together:
 `feat(02-03): real AO emblem + derived EdenDocs logo assets (additive)`.
   </action>
   <verify>
-grep -qi 'efb32c' eden-branding/images/eden-emblem.svg &amp;&amp; grep -qi 'fce88d' eden-branding/images/eden-emblem.svg &amp;&amp; grep -qi 'efb32c' eden-branding/images/collabora-office-white.svg &amp;&amp; grep -qi 'svg' eden-branding/images/toolbar-bg-logo.svg &amp;&amp; grep -q 'EdenDocs' eden-branding/images/eden-logo.svg &amp;&amp; grep -qi 'efb32c' eden-branding/welcome/eden-emblem.svg &amp;&amp; file eden-branding/favicon.ico | grep -qi 'ico' &amp;&amp; magick identify eden-branding/favicon.ico | grep -c 'ICO' | grep -q '3'
+grep -qi 'efb32c' eden-branding/images/eden-emblem.svg && grep -qi 'fce88d' eden-branding/images/eden-emblem.svg && grep -qi 'efb32c' eden-branding/images/collabora-office-white.svg && grep -qi 'svg' eden-branding/images/toolbar-bg-logo.svg && grep -q 'EdenDocs' eden-branding/images/eden-logo.svg && grep -qi 'efb32c' eden-branding/welcome/eden-emblem.svg && file eden-branding/favicon.ico | grep -qi 'ico' && magick identify eden-branding/favicon.ico | grep -c 'ICO' | grep -q '3'
   </verify>
   <done>All 5 SVGs + favicon.ico exist; every emblem-bearing file carries the real gradient stops; eden-logo.svg carries the wordmark; the ICO has 3 size layers.</done>
   <recovery>If magick identify reports fewer than 3 layers, rebuild the ICO from the three PNGs explicitly; if rsvg-convert fails on the SVG, switch to `magick -background none -density 512 ... -resize` per error_recovery.</recovery>
@@ -301,7 +301,7 @@ window.brandProductURL = 'https://aocyber.ai';
 Commit: `feat(02-03): eden-branding branding.css (gold palette) + branding.js (product-name global)`.
   </action>
   <verify>
-grep -qF -- '--color-primary: #D4A853 !important' eden-branding/branding.css &amp;&amp; [ "$(grep -c '!important' eden-branding/branding.css)" -ge 7 ] &amp;&amp; grep -qF -- '--color-primary-text: #3D2A14 !important' eden-branding/branding.css &amp;&amp; grep -qF "window.brandProductName = 'EdenDocs'" eden-branding/branding.js &amp;&amp; grep -q 'Mozilla Public' eden-branding/branding.css &amp;&amp; grep -q 'Mozilla Public' eden-branding/branding.js &amp;&amp; node --check eden-branding/branding.js
+grep -qF -- '--color-primary: #D4A853 !important' eden-branding/branding.css && [ "$(grep -c '!important' eden-branding/branding.css)" -ge 7 ] && grep -qF -- '--color-primary-text: #3D2A14 !important' eden-branding/branding.css && grep -qF "window.brandProductName = 'EdenDocs'" eden-branding/branding.js && grep -q 'Mozilla Public' eden-branding/branding.css && grep -q 'Mozilla Public' eden-branding/branding.js && node --check eden-branding/branding.js
   </verify>
   <done>branding.css carries all 7 gold overrides with !important + MPL header; branding.js parses cleanly and sets both globals with MPL header.</done>
   <recovery>If node --check fails, fix syntax; keep branding.js to plain ES5 global assignments (it runs unbundled in old-style script context in BOTH editor and admin console).</recovery>
@@ -342,7 +342,7 @@ Create `eden-branding/README.md` documenting (concise, one section each):
 Commit: `feat(02-03): EdenDocs welcome page + eden-branding README (additive)`.
   </action>
   <verify>
-! grep -rqi 'collabora' eden-branding/welcome/welcome.html eden-branding/welcome/welcome.css &amp;&amp; grep -q 'github.com/AO-Cyber-Systems/EdenDocs' eden-branding/welcome/welcome.html &amp;&amp; grep -q 'Welcome to EdenDocs' eden-branding/welcome/welcome.html &amp;&amp; ! grep -q 'welcome.js' eden-branding/welcome/welcome.html &amp;&amp; grep -q 'collabora-office-white.svg' eden-branding/README.md &amp;&amp; grep -q 'toolbar-bg' eden-branding/README.md &amp;&amp; grep -qi 'never.*8080\|8080.*never' eden-branding/README.md
+! grep -rqi 'collabora' eden-branding/welcome/welcome.html eden-branding/welcome/welcome.css && grep -q 'github.com/AO-Cyber-Systems/EdenDocs' eden-branding/welcome/welcome.html && grep -q 'Welcome to EdenDocs' eden-branding/welcome/welcome.html && ! grep -q 'welcome.js' eden-branding/welcome/welcome.html && grep -q 'collabora-office-white.svg' eden-branding/README.md && grep -q 'toolbar-bg' eden-branding/README.md && grep -qi 'never.*8080\|8080.*never' eden-branding/README.md
   </verify>
   <done>Welcome page is Collabora-free, self-contained, carries the source-availability link; README documents every mechanism including the filename-collision warning and the port rule.</done>
   <recovery>None destructive — re-edit and re-verify. If the 8080-prohibition grep fails on phrasing, reword to contain "never use port 8080".</recovery>

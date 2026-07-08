@@ -130,7 +130,7 @@ Commit this file ALONE with message
 The commit diff must be exactly one changed line in exactly one file.
   </action>
   <verify>
-grep -q '&lt;title&gt;EdenDocs&lt;/title&gt;' browser/html/cool.html.m4 &amp;&amp; ! grep -q 'Online Editor' browser/html/cool.html.m4 &amp;&amp; git show --stat HEAD | grep -q 'cool.html.m4' &amp;&amp; [ "$(git show --name-only --pretty=format: HEAD | grep -c .)" -eq 1 ]
+grep -q '<title>EdenDocs</title>' browser/html/cool.html.m4 && ! grep -q 'Online Editor' browser/html/cool.html.m4 && git show --stat HEAD | grep -q 'cool.html.m4' && [ "$(git show --name-only --pretty=format: HEAD | grep -c .)" -eq 1 ]
   </verify>
   <done>cool.html.m4 contains `<title>EdenDocs</title>`, the old string is gone, and HEAD is a one-file commit touching only cool.html.m4.</done>
   <recovery>If the verify count shows extra files in the commit, `git reset --soft HEAD~1`, unstage extras, re-commit only cool.html.m4.</recovery>
@@ -153,7 +153,7 @@ Commit this file ALONE with message
 `feat(02-01): EdenDocs admin console tab title (isolated upstream patch 2/2)`.
   </action>
   <verify>
-grep -q '&lt;title&gt;EdenDocs - Admin console&lt;/title&gt;' browser/admin/admintemplate.html &amp;&amp; ! grep -qi 'collabora' browser/admin/admintemplate.html &amp;&amp; [ "$(git show --name-only --pretty=format: HEAD | grep -c .)" -eq 1 ]
+grep -q '<title>EdenDocs - Admin console</title>' browser/admin/admintemplate.html && ! grep -qi 'collabora' browser/admin/admintemplate.html && [ "$(git show --name-only --pretty=format: HEAD | grep -c .)" -eq 1 ]
   </verify>
   <done>admintemplate.html contains `<title>EdenDocs - Admin console</title>` with zero remaining case-insensitive "collabora" occurrences in that file, committed alone.</done>
   <recovery>If the `! grep -qi collabora` leg fails, inspect the other hits: if they are legal/MPL attribution, leave them and narrow the check to the title line only, documenting why in the SUMMARY; if they are user-facing strings, they belong to TRD 02-02/02-05 scope — note them there, do not fix here.</recovery>
@@ -162,8 +162,8 @@ grep -q '&lt;title&gt;EdenDocs - Admin console&lt;/title&gt;' browser/admin/admi
 </tasks>
 
 <validation_gates>
-<lint>bash -n scripts/eden/build.sh &amp;&amp; true # no script changes in this TRD; placeholder gate</lint>
-<test>grep -q '&lt;title&gt;EdenDocs&lt;/title&gt;' browser/html/cool.html.m4 &amp;&amp; grep -q '&lt;title&gt;EdenDocs - Admin console&lt;/title&gt;' browser/admin/admintemplate.html</test>
+<lint>bash -n scripts/eden/build.sh && true # no script changes in this TRD; placeholder gate</lint>
+<test>grep -q '<title>EdenDocs</title>' browser/html/cool.html.m4 && grep -q '<title>EdenDocs - Admin console</title>' browser/admin/admintemplate.html</test>
 <build>true # dist-level proof runs in CI via TRD 02-04/02-05 (Linux build; not buildable on this Mac)</build>
 </validation_gates>
 

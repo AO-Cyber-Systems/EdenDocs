@@ -155,7 +155,7 @@ Commit this file ALONE with message
 `feat(02-02): EdenDocs backstage header (isolated upstream patch, BRAND-05)`.
   </action>
   <verify>
-grep -q 'backstage-header-title">EdenDocs' browser/src/control/backstage/Sidebar.tsx &amp;&amp; ! grep -qi 'collabora' browser/src/control/backstage/Sidebar.tsx &amp;&amp; [ "$(git show --name-only --pretty=format: HEAD | grep -c .)" -eq 1 ]
+grep -q 'backstage-header-title">EdenDocs' browser/src/control/backstage/Sidebar.tsx && ! grep -qi 'collabora' browser/src/control/backstage/Sidebar.tsx && [ "$(git show --name-only --pretty=format: HEAD | grep -c .)" -eq 1 ]
   </verify>
   <done>Sidebar.tsx renders "EdenDocs" in the backstage header, contains zero case-insensitive "collabora" occurrences, committed alone.</done>
   <recovery>If other "collabora" hits exist in the file (e.g. MPL/license comments), leave legal attribution verbatim and narrow the negative grep to non-comment lines; document in SUMMARY.</recovery>
@@ -181,7 +181,7 @@ Commit this file ALONE with message
 `feat(02-02): trademark-free admin Version-tab headers (isolated upstream patch, BRAND-05)`.
   </action>
   <verify>
-grep -q 'EdenDocs (coolwsd)' browser/admin/adminSettings.html &amp;&amp; grep -q 'LibreOffice Core Engine' browser/admin/adminSettings.html &amp;&amp; ! grep -qi 'collabora' browser/admin/adminSettings.html &amp;&amp; [ "$(git show --name-only --pretty=format: HEAD | grep -c .)" -eq 1 ]
+grep -q 'EdenDocs (coolwsd)' browser/admin/adminSettings.html && grep -q 'LibreOffice Core Engine' browser/admin/adminSettings.html && ! grep -qi 'collabora' browser/admin/adminSettings.html && [ "$(git show --name-only --pretty=format: HEAD | grep -c .)" -eq 1 ]
   </verify>
   <done>Both Version-tab headers are trademark-free, the file has zero case-insensitive "collabora" occurrences, committed alone.</done>
   <recovery>If other "collabora" occurrences exist elsewhere in adminSettings.html (research found only these two), classify them: legal attribution → leave + narrow check; user-facing trademark → patch in the SAME commit only if in this same file (still one-file commit), and record the extra surface in the SUMMARY for the 02-05 checklist.</recovery>
@@ -191,7 +191,7 @@ grep -q 'EdenDocs (coolwsd)' browser/admin/adminSettings.html &amp;&amp; grep -q
 
 <validation_gates>
 <lint>npx --prefix browser tsc --noEmit -p browser 2>/dev/null || true # best-effort local TS check; authoritative compile is the CI browser build</lint>
-<test>grep -q 'EdenDocs' browser/src/control/backstage/Sidebar.tsx &amp;&amp; grep -q 'LibreOffice Core Engine' browser/admin/adminSettings.html</test>
+<test>grep -q 'EdenDocs' browser/src/control/backstage/Sidebar.tsx && grep -q 'LibreOffice Core Engine' browser/admin/adminSettings.html</test>
 <build>true # compiled proof (bundle.js) lands in CI via TRD 02-04/02-05</build>
 </validation_gates>
 

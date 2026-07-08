@@ -15,7 +15,7 @@ requirements: [BRAND-05, BRAND-06]
 must_haves:
   truths:
     - "A written trademark/MPL checklist exists covering every surface class from the research taxonomy, with per-surface status and evidence, and every accepted exception explicitly justified"
-    - "A mechanical CI gate (verify-branding.sh) sweeps the BUILT browser/dist for Collabora trademarks against the exceptions file and fails the build on any unexplained hit"
+    - "A mechanical CI gate (verify-branding.sh) sweeps the BUILT browser/dist for Collabora trademarks against the exceptions file — matching per-occurrence snippets (minification-safe), not whole lines — and fails the build on any unexplained hit"
     - "MPL/legal attribution is proven untouched: COPYING, THIRDPARTYLICENSES, CODA-THIRDPARTYLICENSES.html byte-identical to their committed upstream state"
     - "BRAND-06 is a mechanical gate, not a claim: the four phone-home flags are asserted absent from build.sh and the brandProductName canary is asserted present, in CI, on every push"
   artifacts:
@@ -38,7 +38,7 @@ must_haves:
       pattern: "verify-branding\\.sh"
     - from: "scripts/eden/verify-branding.sh"
       to: "scripts/eden/trademark-exceptions.txt"
-      via: "grep -viFf exceptions filter over the dist sweep"
+      via: "per-occurrence snippet extraction (grep -oi ±40-char window) filtered with grep -viFf"
       pattern: "grep -viFf"
     - from: "scripts/eden/trademark-exceptions.txt"
       to: "docs/eden/TRADEMARK-MPL-CHECKLIST.md"
@@ -141,6 +141,10 @@ Research §6 taxonomy classes for the checklist backbone:
   Eden gold).
 - If `grep -viFf` behaves oddly under the environment's ugrep wrapper, use
   `command grep` explicitly inside the script (01-03 lesson).
+- Exceptions are matched against per-occurrence snippets (±40 chars around
+  each hit), so every exceptions line must be a substring that fits inside
+  that window — keep exception strings short and anchored on the trademark
+  text (all pre-seeded entries qualify).
 </error_recovery>
 
 </embedded_context>
@@ -159,7 +163,7 @@ Research §6 taxonomy classes for the checklist backbone:
   net/Socket.cpp COOLWSD strings (deferred BRAND-07, v2).
 - The l10n translation catalogs (browser/dist/l10n/*.json) may carry upstream
   fallback strings in translations; the sweep's include set is
-  *.html/*.js/*.css only — record l10n as a reviewed v1 exception row.
+  *.html/*.js/*.css/*.svg only — record l10n as a reviewed v1 exception row.
 - BRAND-06 flag audit: FEEDBACK_URL/INFOBAR_URL default empty; support-key and
   welcome-url actively disable code paths when unset (research §7). The
   mechanical proof = negative greps on build.sh + the brandProductName canary
@@ -225,7 +229,7 @@ comments — grep -F treats every line literally), pre-seeded per error_recovery
 Commit: `docs(02-05): trademark/MPL checklist + sweep exceptions (BRAND-05)`.
   </action>
   <verify>
-test -f docs/eden/TRADEMARK-MPL-CHECKLIST.md &amp;&amp; grep -q 'Accepted exceptions' docs/eden/TRADEMARK-MPL-CHECKLIST.md &amp;&amp; grep -q 'THIRDPARTYLICENSES' docs/eden/TRADEMARK-MPL-CHECKLIST.md &amp;&amp; grep -q 'github.com/AO-Cyber-Systems/EdenDocs' docs/eden/TRADEMARK-MPL-CHECKLIST.md &amp;&amp; grep -q 'sdk.collaboraonline.com' scripts/eden/trademark-exceptions.txt &amp;&amp; grep -q 'Collabora Online Development Edition (unbranded)' scripts/eden/trademark-exceptions.txt &amp;&amp; grep -q 'collabora-office-white.svg' scripts/eden/trademark-exceptions.txt &amp;&amp; [ "$(grep -c . scripts/eden/trademark-exceptions.txt)" -ge 6 ] &amp;&amp; ! grep -q '^#' scripts/eden/trademark-exceptions.txt
+test -f docs/eden/TRADEMARK-MPL-CHECKLIST.md && grep -q 'Accepted exceptions' docs/eden/TRADEMARK-MPL-CHECKLIST.md && grep -q 'THIRDPARTYLICENSES' docs/eden/TRADEMARK-MPL-CHECKLIST.md && grep -q 'github.com/AO-Cyber-Systems/EdenDocs' docs/eden/TRADEMARK-MPL-CHECKLIST.md && grep -q 'sdk.collaboraonline.com' scripts/eden/trademark-exceptions.txt && grep -q 'Collabora Online Development Edition (unbranded)' scripts/eden/trademark-exceptions.txt && grep -q 'collabora-office-white.svg' scripts/eden/trademark-exceptions.txt && [ "$(grep -c . scripts/eden/trademark-exceptions.txt)" -ge 6 ] && ! grep -q '^#' scripts/eden/trademark-exceptions.txt
   </verify>
   <done>Checklist covers taxonomy + per-surface rows + justified exceptions + MPL section + BRAND-06 section; exceptions file is comment-free fixed strings, each mirrored by a checklist row.</done>
   <recovery>Documentation-only — re-edit and re-verify.</recovery>
@@ -253,12 +257,24 @@ on every assertion). Gates, in order:
    and the value EdenDocs.
 4. BRAND-04: `command grep -qF -- '--color-primary: #D4A853 !important' browser/dist/branding.css`;
    welcome clean: `! command grep -rqi collabora browser/dist/welcome/`.
-5. BRAND-05 sweep (the core gate):
+5. BRAND-05 sweep (the core gate) — PER-OCCURRENCE, not per-line: esbuild
+   --minify puts bundle.js on very few physical lines, so line-based
+   filtering would let one accepted string (e.g. the unbranded-fallback
+   literal) silently mask an undiscovered leak sharing the same minified
+   line. Extract a bounded snippet around EVERY occurrence, then filter the
+   snippets against the exceptions file:
    ```bash
-   SURVIVORS=$(command grep -rni 'collabora' browser/dist \
-     --include='*.html' --include='*.js' --include='*.css' \
+   SURVIVORS=$(command grep -rhoi '.\{0,40\}collabora.\{0,40\}' browser/dist \
+     --include='*.html' --include='*.js' --include='*.css' --include='*.svg' \
      | command grep -viFf scripts/eden/trademark-exceptions.txt || true)
-   [ -z "$SURVIVORS" ] || { echo "ERROR: unexplained Collabora trademark hits in browser/dist:"; echo "$SURVIVORS"; echo "Fix the surface or add a JUSTIFIED exception (checklist row required)."; exit 1; }
+   if [ -n "$SURVIVORS" ]; then
+     echo "ERROR: unexplained Collabora trademark occurrences in browser/dist:"
+     echo "$SURVIVORS" | sort -u
+     echo "--- files containing 'collabora' (for diagnosis) ---"
+     command grep -rli 'collabora' browser/dist --include='*.html' --include='*.js' --include='*.css' --include='*.svg' || true
+     echo "Fix the surface or add a JUSTIFIED exception (checklist row required)."
+     exit 1
+   fi
    ```
 6. BRAND-05 legal: `git diff --quiet HEAD -- COPYING THIRDPARTYLICENSES CODA-THIRDPARTYLICENSES.html`
    plus `command grep -q 'Mozilla Public' COPYING`.
@@ -280,7 +296,7 @@ YAML-lint the workflow. `chmod +x scripts/eden/verify-branding.sh`.
 Commit: `feat(02-05): verify-branding.sh mechanical gate + CI step (BRAND-05/06)`.
   </action>
   <verify>
-bash -n scripts/eden/verify-branding.sh &amp;&amp; test -x scripts/eden/verify-branding.sh &amp;&amp; grep -q 'trademark-exceptions.txt' scripts/eden/verify-branding.sh &amp;&amp; grep -q 'git diff --quiet HEAD -- COPYING' scripts/eden/verify-branding.sh &amp;&amp; grep -qF -- '--with-welcome-url' scripts/eden/verify-branding.sh &amp;&amp; grep -q 'brandProductName' scripts/eden/verify-branding.sh &amp;&amp; python3 -c "import yaml; yaml.safe_load(open('.github/workflows/build.yml'))" &amp;&amp; grep -q 'verify-branding.sh' .github/workflows/build.yml &amp;&amp; ! grep -q '8080' scripts/eden/verify-branding.sh
+bash -n scripts/eden/verify-branding.sh && test -x scripts/eden/verify-branding.sh && grep -q 'trademark-exceptions.txt' scripts/eden/verify-branding.sh && grep -qF -- "--include='*.svg'" scripts/eden/verify-branding.sh && grep -q 'git diff --quiet HEAD -- COPYING' scripts/eden/verify-branding.sh && grep -qF -- '--with-welcome-url' scripts/eden/verify-branding.sh && grep -q 'brandProductName' scripts/eden/verify-branding.sh && python3 -c "import yaml; yaml.safe_load(open('.github/workflows/build.yml'))" && grep -q 'verify-branding.sh' .github/workflows/build.yml && ! grep -q '8080' scripts/eden/verify-branding.sh
   </verify>
   <done>verify-branding.sh syntax-checks, is executable, contains all 7 gate groups, no port references; build.yml parses and invokes it as a thin step after the smoke test.</done>
   <recovery>If YAML indentation breaks the workflow, restore from git and re-apply as a minimal single-step insertion; never restructure existing steps.</recovery>
@@ -306,7 +322,7 @@ is empty). Final commit:
 `docs(02-05): checklist evidence from green CI run (BRAND-05 verified)`.
   </action>
   <verify>
-gh run list --workflow=build.yml --branch eden-main --limit 1 --json conclusion --jq '.[0].conclusion' | grep -q success &amp;&amp; grep -qE 'runs/[0-9]+' docs/eden/TRADEMARK-MPL-CHECKLIST.md &amp;&amp; git diff --quiet HEAD -- COPYING THIRDPARTYLICENSES CODA-THIRDPARTYLICENSES.html
+gh run list --workflow=build.yml --branch eden-main --limit 1 --json conclusion --jq '.[0].conclusion' | grep -q success && grep -qE 'runs/[0-9]+' docs/eden/TRADEMARK-MPL-CHECKLIST.md && git diff --quiet HEAD -- COPYING THIRDPARTYLICENSES CODA-THIRDPARTYLICENSES.html
   </verify>
   <done>Latest eden-main run is green WITH the verify-branding step passing; checklist carries the run evidence; legal files are diff-clean.</done>
   <recovery>If a survivor is a genuinely new upstream surface (not in research), classify it via the taxonomy before acting; if it needs an upstream-file patch, make it an isolated one-file commit and add it to the checklist's divergence-allowlist section. If >4 CI cycles loom, STOP and surface findings to the user.</recovery>
@@ -315,7 +331,7 @@ gh run list --workflow=build.yml --branch eden-main --limit 1 --json conclusion 
 </tasks>
 
 <validation_gates>
-<lint>bash -n scripts/eden/verify-branding.sh &amp;&amp; python3 -c "import yaml; yaml.safe_load(open('.github/workflows/build.yml'))"</lint>
+<lint>bash -n scripts/eden/verify-branding.sh && python3 -c "import yaml; yaml.safe_load(open('.github/workflows/build.yml'))"</lint>
 <test>! grep -rn '8080' scripts/eden/verify-branding.sh docs/eden/TRADEMARK-MPL-CHECKLIST.md | grep -vi 'never\|banned\|prohibit\|do not' | grep -q .</test>
 <build>gh run list --workflow=build.yml --branch eden-main --limit 1 --json conclusion --jq '.[0].conclusion' | grep -q success</build>
 </validation_gates>

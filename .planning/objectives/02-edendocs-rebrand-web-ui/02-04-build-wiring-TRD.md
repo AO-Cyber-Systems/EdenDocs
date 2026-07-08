@@ -36,6 +36,10 @@ must_haves:
       to: "http://127.0.0.1:9980/favicon.ico"
       via: "curl | cmp against eden-branding/favicon.ico"
       pattern: "favicon"
+    - from: "scripts/eden/smoke-test.sh"
+      to: "http://127.0.0.1:9980/browser/dist/admin/admin.html"
+      via: "curl -u admin:admin | grep branding.js — live %BRANDING_JS% substitution proof (BRAND-03)"
+      pattern: "admin\\.html"
 ---
 
 <objective>
@@ -125,10 +129,15 @@ coolwsd.xml is GITIGNORED (verified) — injecting values into it dirties nothin
 - If the brandProductName canary grep fails: someone/something enabled a
   welcome URL — inspect `$CONFIGURE_LOG` for ENABLE_WELCOME_MESSAGE; do NOT
   loosen the assertion (mirror of the POCO-fallback rule).
-- If the admin-console curl check proves un-curlable (auth/route differences),
-  downgrade THAT ONE check to the static dist grep (browser/dist admin
-  template) and record the substitution in the SUMMARY — do not delete the
-  check silently.
+- The admin-console live check hits the real Basic-Auth-gated route
+  (`curl -fsS -u admin:admin http://127.0.0.1:9980/browser/dist/admin/admin.html`,
+  served by wsd/COOLWSD.cpp; credentials come from the smoke test's existing
+  `--o:admin_console.username=admin --o:admin_console.password=admin` launch
+  flags). If it fails for route/auth reasons rather than a missing branding
+  hook, diagnose against /tmp/coolwsd.log first; only if the route is
+  genuinely unavailable in this build may THAT ONE check be downgraded to the
+  static dist grep (browser/dist admin template), recorded in the SUMMARY —
+  never delete the check silently.
 - CI fix cycles: diagnose from `gh run view --log-failed` (raw log zip via
   `gh api` if truncated) BEFORE any fix commit — Objective 1's pattern.
   Guidance: ≤4 fix cycles.
@@ -215,10 +224,21 @@ coolwsd.xml is GITIGNORED (verified) — injecting values into it dirties nothin
      || { echo "ERROR: brandProductName key missing from generated coolwsd.xml — welcome-url dependency broken (see 2-RESEARCH.md Pitfall 1)"; exit 1; }
    ```
    Then inject the EdenDocs values into the GENERATED (gitignored) coolwsd.xml
-   with a python3 one-liner using regex replacements on the three elements:
-   brandProductName inner text → `EdenDocs`; brandProductURL inner text →
-   `https://aocyber.ai` (overriding the collaboraonline.com default);
-   logoURL inner text → `images/eden-logo.svg`. Follow with loud assertions:
+   with this literal heredoc (brandProductURL overrides the
+   collaboraonline.com default; add verbatim to build.sh, heredoc body at
+   column 0 — heredoc terminators must start at line start):
+   ```bash
+   python3 - <<'PYEOF'
+   import re, pathlib
+   p = pathlib.Path('coolwsd.xml')
+   c = p.read_text()
+   c = re.sub(r'(<brandProductName[^>]*>)[^<]*(</brandProductName>)', r'\1EdenDocs\2', c)
+   c = re.sub(r'(<brandProductURL[^>]*>)[^<]*(</brandProductURL>)', r'\1https://aocyber.ai\2', c)
+   c = re.sub(r'(<logoURL[^>]*>)[^<]*(</logoURL>)', r'\1images/eden-logo.svg\2', c)
+   p.write_text(c)
+   PYEOF
+   ```
+   Follow with loud assertions:
    ```bash
    grep -q ">EdenDocs</brandProductName>" coolwsd.xml || { echo "ERROR: brandProductName injection failed"; exit 1; }
    grep -q "aocyber.ai</brandProductURL>" coolwsd.xml || { echo "ERROR: brandProductURL injection failed"; exit 1; }
@@ -228,7 +248,7 @@ Commit: `feat(02-04): branding configure flags + coolwsd.xml brand keys + welcom
 (commit ONLY scripts/eden/build.sh).
   </action>
   <verify>
-bash -n scripts/eden/build.sh &amp;&amp; grep -q -- '--with-app-branding="$PWD/eden-branding"' scripts/eden/build.sh &amp;&amp; grep -q -- '--with-app-name="EdenDocs"' scripts/eden/build.sh &amp;&amp; grep -q -- '--with-vendor="AO Cyber Systems"' scripts/eden/build.sh &amp;&amp; grep -q -- '--with-help-url="https://aocyber.ai"' scripts/eden/build.sh &amp;&amp; grep -q '&lt;brandProductName' scripts/eden/build.sh &amp;&amp; ! grep -q -- '--with-welcome-url' scripts/eden/build.sh &amp;&amp; ! grep -q -- '--with-feedback-url' scripts/eden/build.sh &amp;&amp; ! grep -q -- '--with-infobar-url' scripts/eden/build.sh &amp;&amp; ! grep -q -- '--with-support-public-key' scripts/eden/build.sh &amp;&amp; ! grep -q '8080' scripts/eden/build.sh
+bash -n scripts/eden/build.sh && grep -q -- '--with-app-branding="$PWD/eden-branding"' scripts/eden/build.sh && grep -q -- '--with-app-name="EdenDocs"' scripts/eden/build.sh && grep -q -- '--with-vendor="AO Cyber Systems"' scripts/eden/build.sh && grep -q -- '--with-help-url="https://aocyber.ai"' scripts/eden/build.sh && grep -q '<brandProductName' scripts/eden/build.sh && ! grep -q -- '--with-welcome-url' scripts/eden/build.sh && ! grep -q -- '--with-feedback-url' scripts/eden/build.sh && ! grep -q -- '--with-infobar-url' scripts/eden/build.sh && ! grep -q -- '--with-support-public-key' scripts/eden/build.sh && ! grep -q '8080' scripts/eden/build.sh
   </verify>
   <done>build.sh syntax-checks; carries all four branding flags, the canary + injection assertions, and contains NO occurrence of the four forbidden flags (even in comments) nor of 8080.</done>
   <recovery>If a negative grep trips on a comment, reword the comment to name flags without leading dashes. Never weaken the verify command.</recovery>
@@ -274,6 +294,8 @@ branding checks on native port 9980 using the existing `fail()` helper:
      || fail "served favicon is not the EdenDocs favicon (BRAND-04)"
    curl -fsS http://127.0.0.1:9980/browser/dist/images/eden-logo.svg | grep -qi 'efb32c' \
      || fail "eden-logo.svg not served from dist images (BRAND-01 logoURL target)"
+   curl -fsS -u admin:admin http://127.0.0.1:9980/browser/dist/admin/admin.html | grep -q 'branding.js' \
+     || fail "admin console page does not reference branding.js (BRAND-03 %BRANDING_JS% hook missing)"
    echo "BRANDING SMOKE PASSED: EdenDocs branding served on 9980"
    ```
    Keep the final success echo of the script intact; add the branding echo
@@ -284,9 +306,9 @@ Commit both files together:
 include a modified root favicon.ico if present locally).
   </action>
   <verify>
-bash -n scripts/eden/build.sh &amp;&amp; bash -n scripts/eden/smoke-test.sh &amp;&amp; grep -q 'rm -rf browser/dist/welcome' scripts/eden/build.sh &amp;&amp; grep -q 'cp eden-branding/favicon.ico ./favicon.ico' scripts/eden/build.sh &amp;&amp; grep -q 'efb32c' scripts/eden/build.sh &amp;&amp; grep -q 'branding.css' scripts/eden/smoke-test.sh &amp;&amp; grep -q 'cmp -s - eden-branding/favicon.ico' scripts/eden/smoke-test.sh &amp;&amp; ! grep -c '8080' scripts/eden/smoke-test.sh | grep -qv '^1$' &amp;&amp; git show --name-only --pretty=format: HEAD | grep -vq 'favicon.ico'
+bash -n scripts/eden/build.sh && bash -n scripts/eden/smoke-test.sh && grep -q 'rm -rf browser/dist/welcome' scripts/eden/build.sh && grep -q 'cp eden-branding/favicon.ico ./favicon.ico' scripts/eden/build.sh && grep -q 'efb32c' scripts/eden/build.sh && grep -q 'branding.css' scripts/eden/smoke-test.sh && grep -q 'cmp -s - eden-branding/favicon.ico' scripts/eden/smoke-test.sh && grep -q -- '-u admin:admin' scripts/eden/smoke-test.sh && ! grep -c '8080' scripts/eden/smoke-test.sh | grep -qv '^1$' && git show --name-only --pretty=format: HEAD | grep -vq 'favicon.ico'
   </verify>
-  <done>Both scripts syntax-check; overlays are full-replacement style; smoke test carries the 5 runtime branding checks; the commit does not include favicon.ico; smoke-test.sh's only 8080 mention remains its pre-existing prohibition comment.</done>
+  <done>Both scripts syntax-check; overlays are full-replacement style; smoke test carries the 6 runtime branding checks; the commit does not include favicon.ico; smoke-test.sh's only 8080 mention remains its pre-existing prohibition comment.</done>
   <recovery>If the smoke additions reference a wrong served path, adjust ONLY the path (never the port — 9980) after checking research §8's verification-command candidates; if favicon.ico shows in `git status`, run `git checkout -- favicon.ico` before committing.</recovery>
 </task>
 
@@ -318,7 +340,7 @@ gh run list --workflow=build.yml --branch eden-main --limit 1 --json conclusion 
 </tasks>
 
 <validation_gates>
-<lint>bash -n scripts/eden/build.sh &amp;&amp; bash -n scripts/eden/smoke-test.sh</lint>
+<lint>bash -n scripts/eden/build.sh && bash -n scripts/eden/smoke-test.sh</lint>
 <test>! grep -rn '8080' scripts/eden/build.sh scripts/eden/smoke-test.sh | grep -vi 'never\|banned\|prohibit\|do not' | grep -q .</test>
 <build>gh run list --workflow=build.yml --branch eden-main --limit 1 --json conclusion --jq '.[0].conclusion' | grep -q success</build>
 </validation_gates>
@@ -326,7 +348,7 @@ gh run list --workflow=build.yml --branch eden-main --limit 1 --json conclusion 
 <verification>
 - build.sh: 4 branding flags present; 4 forbidden flags absent (as literal
   `--flag` strings anywhere in the file); canary + injection assertions loud.
-- smoke-test.sh: 5 runtime branding checks on 9980 using fail().
+- smoke-test.sh: 6 runtime branding checks on 9980 using fail() (incl. the Basic-Auth admin-console BRAND-03 live check).
 - CI green with BRANDING SMOKE PASSED in logs.
 - Repo-root favicon.ico NOT committed (git log -- favicon.ico shows no new
   commit; the overlay is build-time only).
@@ -336,8 +358,9 @@ gh run list --workflow=build.yml --branch eden-main --limit 1 --json conclusion 
 A push-triggered CI run builds the fully-branded tree from the committed
 scripts alone and proves at runtime — on coolwsd's native 9980 — that the
 editor page references branding.css, titles/vendor read EdenDocs / AO Cyber
-Systems, the favicon is byte-identical to the Eden asset, and the brand keys
-survived configure (BRAND-06 canary intact).
+Systems, the favicon is byte-identical to the Eden asset, the admin console
+page references branding.js live (BRAND-03), and the brand keys survived
+configure (BRAND-06 canary intact).
 </success_criteria>
 
 <output>
