@@ -53,3 +53,8 @@ jobs:
       # BUILD-04: native port 9980 — port 8080 is banned project-wide.
       - name: Smoke test /hosting/discovery + /hosting/capabilities on 9980
         run: ./scripts/eden/smoke-test.sh
+
+      # BRAND-01..06: mechanical rebrand gate — static dist sweep + MPL +
+      # no-phone-home assertions (runtime checks live in smoke-test.sh).
+      - name: Verify EdenDocs branding + trademark/MPL gates
+        run: ./scripts/eden/verify-branding.sh
