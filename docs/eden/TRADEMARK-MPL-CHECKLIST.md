@@ -33,6 +33,7 @@ BRAND-07, v2), container image LABELs (Objective 4 — see row in §3).
 | Admin console tab title | 1 | Isolated upstream patch to `browser/admin/admintemplate.html` | 02-01 commit `d27976178bb` | verify-branding.sh gate 2 (`<title>EdenDocs - Admin console</title>` in dist admin template) |
 | Backstage header string ("Collabora Office") | 1 | Isolated upstream patch to `browser/src/control/backstage/Sidebar.tsx` | 02-02 commit `f13d4afc092` | Sweep (gate 5) finds no `Collabora Office` header string in dist bundles |
 | Admin Version-tab headers ("Collabora Online" / "Collabora Office Engine") | 1 | Isolated upstream patch to `browser/admin/adminSettings.html` | 02-02 commit `b2759f21f4a` | Sweep (gate 5); admin HTML verified hit-free at source |
+| Integrator-settings tab title (`<title>Collabora Online - Settings</title>` → `EdenDocs - Settings`) — **caught by the gate-5 sweep in CI** (run 28964158981), the sweep's first real find | 1 | Isolated upstream patch to `browser/admin/adminIntegratorSettings.html.m4` | 02-05 commit `6f9e184b4ec` | Sweep (gate 5) — the run 28964158981 survivor printout is the detection evidence |
 | Backstage logo SVG content (`collabora-office-white.svg`) | 1 | Same-filename collision overwrite: `eden-branding/images/collabora-office-white.svg` ships the AO gold emblem via `--with-app-branding`'s `images/*.svg` glob (zero upstream edits) | 02-03 commit `938f8bf3714` | verify-branding.sh gate 1 (`efb32c` gold gradient present in dist SVG) |
 | Favicon | 1 | Build-time overlay `cp eden-branding/favicon.ico ./favicon.ico` (no config override exists upstream — hardcoded lookup in `wsd/ClientRequestDispatcher.cpp`); NEVER committed at repo root | 02-03 asset + 02-04 commit `60daa2727fc` | Runtime byte-compare in smoke-test.sh (`BRANDING SMOKE PASSED`, run 28960901457) |
 | Welcome page (fully Collabora-branded upstream asset) | 1 | Full replacement (`rm -rf` + `cp -R eden-branding/welcome`) — partial overlay would leave upstream slides/js | 02-03 commit `25ce2fbc786` + 02-04 commit `60daa2727fc` | verify-branding.sh gate 4 (`browser/dist/welcome/` contains no `collabora`, asserted case-insensitively) |
@@ -141,6 +142,7 @@ single-purpose commit (UPST-02 harvest list):
 | `browser/admin/admintemplate.html` | `d27976178bb` (02-01) | Admin `<title>EdenDocs - Admin console</title>` |
 | `browser/src/control/backstage/Sidebar.tsx` | `f13d4afc092` (02-02) | Backstage header "EdenDocs" |
 | `browser/admin/adminSettings.html` | `b2759f21f4a` (02-02) | Trademark-free admin Version-tab headers |
+| `browser/admin/adminIntegratorSettings.html.m4` | `6f9e184b4ec` (02-05) | Integrator-settings `<title>EdenDocs - Settings</title>` (gate-5 sweep catch) |
 
 **REMARK — build-time-only working-tree divergence:** repo-root `favicon.ico`
 is overwritten at build time by `scripts/eden/build.sh`
@@ -158,8 +160,18 @@ the first green run of this gate.*
 
 ## 8. Green-run evidence
 
-*(filled by the CI evidence pass)*
+*(final green run pending — blocked by an exogenous upstream engine-tarball
+republish at 2026-07-08T18:02:24Z that SIGSEGVs kit startup; see
+02-05-SUMMARY.md. Resume: rerun run 28964794754 after the next upstream
+republish of `engine-main-assets.tar.gz`.)*
 
-- Run: pending
-- `BRANDING VERIFICATION PASSED (BRAND-01..06)`: pending
-- `BRANDING SMOKE PASSED` (runtime half, from 02-04's smoke-test.sh): pending
+Partial evidence already banked:
+
+- Run [28964158981](https://github.com/AO-Cyber-Systems/EdenDocs/actions/runs/28964158981):
+  gates 1-4 executed PASS against the real Linux dist; gate 5 correctly
+  detected exactly ONE unexplained survivor
+  (`<title>Collabora Online - Settings</title>`) with self-diagnosing output —
+  fixed by isolated patch `6f9e184b4ec`. All 22 exception lines and the
+  sweep-scope excludes were exact on first contact with the real dist tree.
+- `BRANDING SMOKE PASSED` (runtime half): runs 28964158981 and 28960901457.
+- Final `BRANDING VERIFICATION PASSED (BRAND-01..06)` line: pending green run.
