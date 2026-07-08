@@ -9,10 +9,10 @@ Requirements for initial release. Each maps to roadmap objectives.
 
 ### Build Pipeline
 
-- [ ] **BUILD-01**: Developer can build coolwsd + browser/dist from EdenDocs source on Linux using the prebuilt engine assets fast path (`ENGINE_ASSETS` tarball, no from-scratch `engine/` compile)
-- [ ] **BUILD-02**: Build validates early that the prebuilt engine tarball satisfies in-tree POCO auto-discovery (`--with-lo-builddir`, no `--with-poco-*` flags); documented fallback if it doesn't
-- [ ] **BUILD-03**: CI builds eden-main on GitHub-hosted ubuntu runners on every push, modeled on the in-tree `codeql-analysis.yml` configure invocation (Node 20 LTS, ccache)
-- [ ] **BUILD-04**: Built coolwsd passes a smoke test — serves `/hosting/discovery` and `/hosting/capabilities` (never on port 8080; local checks use coolwsd's native 9980)
+- [x] **BUILD-01**: Developer can build coolwsd + browser/dist from EdenDocs source on Linux using the prebuilt engine assets fast path (`ENGINE_ASSETS` tarball, no from-scratch `engine/` compile)
+- [x] **BUILD-02**: Build validates early that the prebuilt engine tarball satisfies in-tree POCO auto-discovery (`--with-lo-builddir`, no `--with-poco-*` flags); documented fallback if it doesn't
+- [x] **BUILD-03**: CI builds eden-main on GitHub-hosted ubuntu runners on every push, modeled on the in-tree `codeql-analysis.yml` configure invocation (Node 20 LTS, ccache)
+- [x] **BUILD-04**: Built coolwsd passes a smoke test — serves `/hosting/discovery` and `/hosting/capabilities` (never on port 8080; local checks use coolwsd's native 9980)
 
 ### Rebrand
 
@@ -72,10 +72,10 @@ Which objectives cover which requirements. Updated during roadmap creation.
 
 | Requirement | Objective | Status |
 |-------------|-----------|--------|
-| BUILD-01 | Objective 1 - From-Source Build Pipeline | Pending |
-| BUILD-02 | Objective 1 - From-Source Build Pipeline | Pending |
-| BUILD-03 | Objective 1 - From-Source Build Pipeline | Pending |
-| BUILD-04 | Objective 1 - From-Source Build Pipeline | Pending |
+| BUILD-01 | Objective 1 - From-Source Build Pipeline | Complete |
+| BUILD-02 | Objective 1 - From-Source Build Pipeline | Complete |
+| BUILD-03 | Objective 1 - From-Source Build Pipeline | Complete |
+| BUILD-04 | Objective 1 - From-Source Build Pipeline | Complete |
 | BRAND-01 | Objective 2 - EdenDocs Rebrand of the Web UI | Pending |
 | BRAND-02 | Objective 2 - EdenDocs Rebrand of the Web UI | Pending |
 | BRAND-03 | Objective 2 - EdenDocs Rebrand of the Web UI | Pending |
