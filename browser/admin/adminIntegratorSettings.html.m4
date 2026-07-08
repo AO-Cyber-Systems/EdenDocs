@@ -37,7 +37,7 @@ m4_dnl------------------------------------------------------------------------
       [<script>(function () { var l = new URLSearchParams(window.location.search).get('lang'); window.LANG = (l && l !== 'undefined') ? l : 'en-US'; })();</script>
       <script src="l10n-settings.js"></script>],
       [<link rel="localizations" href="%SERVICE_ROOT%/browser/%VERSION%/l10n/localizations.json" type="application/vnd.oftn.l10n+json"/>])
-    <title>Collabora Online - Settings</title>
+    <title>EdenDocs - Settings</title>
     <link
       rel="StyleSheet"
       href="m4_ifelse(MOBILEAPP, [], [%SERVICE_ROOT%/browser/%VERSION%/])admin/css/admin.css"
