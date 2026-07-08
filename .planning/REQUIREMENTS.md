@@ -16,12 +16,12 @@ Requirements for initial release. Each maps to roadmap objectives.
 
 ### Rebrand
 
-- [ ] **BRAND-01**: Editor UI shows EdenDocs product name and logo via `coolwsd.xml` (`brandProductName`/`brandProductURL`/`logoURL`) plus an additive `eden-branding/` directory wired with `--with-app-branding` (branding.css, branding.js, logo SVGs, toolbar-bg-logo)
-- [ ] **BRAND-02**: Window/tab titles and About dialog show EdenDocs (the two isolated `<title>` patches in `cool.html.m4` and `admintemplate.html`, kept as their own commits; `--with-app-name="EdenDocs"` / `--with-vendor="AO Cyber Systems"` compiled fallbacks)
-- [ ] **BRAND-03**: Admin console carries EdenDocs branding via the shared `%BRANDING_JS%` hook
-- [ ] **BRAND-04**: Favicon replaced and color palette overridden via a branding-dir CSS file (upstream `color-palette.css` never edited in place), using approved Eden brand tokens
+- [x] **BRAND-01**: Editor UI shows EdenDocs product name and logo via `coolwsd.xml` (`brandProductName`/`brandProductURL`/`logoURL`) plus an additive `eden-branding/` directory wired with `--with-app-branding` (branding.css, branding.js, logo SVGs, toolbar-bg-logo)
+- [x] **BRAND-02**: Window/tab titles and About dialog show EdenDocs (the two isolated `<title>` patches in `cool.html.m4` and `admintemplate.html`, kept as their own commits; `--with-app-name="EdenDocs"` / `--with-vendor="AO Cyber Systems"` compiled fallbacks)
+- [x] **BRAND-03**: Admin console carries EdenDocs branding via the shared `%BRANDING_JS%` hook
+- [x] **BRAND-04**: Favicon replaced and color palette overridden via a branding-dir CSS file (upstream `color-palette.css` never edited in place), using approved Eden brand tokens
 - [ ] **BRAND-05**: Collabora trademarks removed from all user-facing surfaces (UI strings, help_url, container LABEL metadata) while MPL headers, COPYING, and THIRDPARTYLICENSES attribution are preserved — verified against a written trademark/MPL checklist
-- [ ] **BRAND-06**: No-phone-home defaults verified: `INFOBAR_URL`/`FEEDBACK_URL`/`INFO_URL` unset, `--with-support-public-key` never passed, `--with-welcome-url` never passed
+- [x] **BRAND-06**: No-phone-home defaults verified: `INFOBAR_URL`/`FEEDBACK_URL`/`INFO_URL` unset, `--with-support-public-key` never passed, `--with-welcome-url` never passed
 
 ### Authentication (AOID)
 
@@ -76,12 +76,12 @@ Which objectives cover which requirements. Updated during roadmap creation.
 | BUILD-02 | Objective 1 - From-Source Build Pipeline | Complete |
 | BUILD-03 | Objective 1 - From-Source Build Pipeline | Complete |
 | BUILD-04 | Objective 1 - From-Source Build Pipeline | Complete |
-| BRAND-01 | Objective 2 - EdenDocs Rebrand of the Web UI | Pending |
-| BRAND-02 | Objective 2 - EdenDocs Rebrand of the Web UI | Pending |
-| BRAND-03 | Objective 2 - EdenDocs Rebrand of the Web UI | Pending |
-| BRAND-04 | Objective 2 - EdenDocs Rebrand of the Web UI | Pending |
+| BRAND-01 | Objective 2 - EdenDocs Rebrand of the Web UI | Complete |
+| BRAND-02 | Objective 2 - EdenDocs Rebrand of the Web UI | Complete |
+| BRAND-03 | Objective 2 - EdenDocs Rebrand of the Web UI | Complete |
+| BRAND-04 | Objective 2 - EdenDocs Rebrand of the Web UI | Complete |
 | BRAND-05 | Objective 2 - EdenDocs Rebrand of the Web UI | Pending |
-| BRAND-06 | Objective 2 - EdenDocs Rebrand of the Web UI | Pending |
+| BRAND-06 | Objective 2 - EdenDocs Rebrand of the Web UI | Complete |
 | AUTH-01 | Objective 3 - AOID Authentication Integration (OIDC) | Pending |
 | AUTH-02 | Objective 3 - AOID Authentication Integration (OIDC) | Pending |
 | AUTH-03 | Objective 3 - AOID Authentication Integration (OIDC) | Pending |

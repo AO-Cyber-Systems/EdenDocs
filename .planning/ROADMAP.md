@@ -69,7 +69,7 @@ Jobs:
 - [x] 02-01: Isolated upstream `<title>` patches, editor + admin console (02-01-upstream-title-patches-TRD.md) — wave 1
 - [x] 02-02: Backstage header + admin Version-tab trademark patches (02-02-upstream-trademark-patches-TRD.md) — wave 1
 - [x] 02-03: Additive eden-branding/ assets: real AO emblem, gold palette CSS, branding.js, favicon, welcome page (02-03-eden-branding-assets-TRD.md) — wave 1
-- [ ] 02-04: Build wiring: configure flags, coolwsd.xml brand keys, favicon/welcome overlays, branding smoke checks, CI green (02-04-build-wiring-TRD.md) — wave 2
+- [x] 02-04: Build wiring: configure flags, coolwsd.xml brand keys, favicon/welcome overlays, branding smoke checks, CI green (02-04-build-wiring-TRD.md) — wave 2
 - [ ] 02-05: Trademark/MPL checklist + verify-branding.sh mechanical CI gate (02-05-trademark-checklist-verification-TRD.md) — wave 3
 
 > **Prerequisite (not a formal objective dependency):** Per UPST-01 and research
