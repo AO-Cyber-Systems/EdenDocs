@@ -1,0 +1,78 @@
+/* -*- css -*- */
+/*
+ * Copyright the EdenDocs contributors / AO Cyber Systems.
+ *
+ * This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ */
+
+:root {
+  --eden-bg: #0a0a0a;
+  --eden-text: #f5f5f5;
+  --eden-text-muted: #a0a0a0;
+  --eden-gold: #d4a853;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  min-height: 100%;
+}
+
+body {
+  background: var(--eden-bg);
+  color: var(--eden-text);
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  padding: 32px;
+}
+
+.welcome {
+  max-width: 560px;
+  text-align: center;
+}
+
+.welcome__emblem {
+  width: 120px;
+  height: auto;
+  margin-bottom: 24px;
+}
+
+.welcome__title {
+  font-size: 2rem;
+  font-weight: 600;
+  line-height: 1.2;
+  margin: 0 auto 20px;
+  padding-bottom: 16px;
+  border-bottom: 2px solid var(--eden-gold);
+  display: inline-block;
+}
+
+.welcome__lede {
+  font-size: 1.05rem;
+  line-height: 1.6;
+  color: var(--eden-text-muted);
+  margin: 0 0 40px;
+}
+
+.welcome__footer {
+  font-size: 0.85rem;
+  color: var(--eden-text-muted);
+}
+
+.welcome__footer a {
+  color: var(--eden-gold);
+  text-decoration: none;
+}
+
+.welcome__footer a:hover {
+  text-decoration: underline;
+}
