@@ -49,9 +49,9 @@ Decimal objectives appear between their surrounding integers in numeric order.
 **Plans**: 3 TRDs (3 waves, sequential)
 
 Jobs:
-- [ ] 01-01: Build scripts + early POCO/tarball validation (01-01-build-scripts-TRD.md) — wave 1
-- [ ] 01-02: Push-triggered CI workflow green on eden-main (01-02-ci-workflow-TRD.md) — wave 2
-- [ ] 01-03: Developer build documentation BUILDING-EdenDocs.md (01-03-build-doc-TRD.md) — wave 3
+- [x] 01-01: Build scripts + early POCO/tarball validation (01-01-build-scripts-TRD.md) — wave 1
+- [x] 01-02: Push-triggered CI workflow green on eden-main (01-02-ci-workflow-TRD.md) — wave 2
+- [x] 01-03: Developer build documentation BUILDING-EdenDocs.md (01-03-build-doc-TRD.md) — wave 3
 
 ### Objective 2: EdenDocs Rebrand of the Web UI
 **Goal**: Every user-facing surface of the editor and admin console — name, logo, colors, favicon, About dialog, help links — shows EdenDocs branding, delivered through config keys and an additive `eden-branding/` directory rather than scattered source edits, with Collabora trademarks removed and MPL/legal attribution preserved.
