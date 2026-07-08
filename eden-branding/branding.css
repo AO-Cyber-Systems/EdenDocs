@@ -10,8 +10,8 @@
 :root {
   /* Eden UI gold ramp (PROJECT.md locked decision). !important is REQUIRED:
    * the ?darkTheme=true script appendChild()s color-palette-dark.css AFTER
-   * this file in <head>, silently reverting non-!important overrides to
-   * Collabora blue (2-RESEARCH.md Pitfall 2). */
+   * this file in <head>, silently reverting non-!important overrides back to
+   * the upstream blue #0b87e7 (2-RESEARCH.md Pitfall 2). */
   --color-primary: #D4A853 !important;          /* gold-500 */
   --color-primary-dark: #A67A38 !important;     /* gold-700 */
   --color-primary-darker: #856131 !important;   /* gold-800 */
