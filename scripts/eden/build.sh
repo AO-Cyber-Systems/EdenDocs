@@ -52,11 +52,19 @@ grep -q "POCO not found in the engine workdir, falling back to system POCO" "$CO
 
 make -j"$(nproc)" build-nocheck
 
+# build-nocheck maps to automake's `all-am` (Makefile.am:854), which builds
+# only the top-level directory and its all-local hooks — it does NOT recurse
+# into SUBDIRS, so browser/ (and therefore browser/dist) is never built by
+# it. codeql-analysis.yml never notices because CodeQL only needs the C++
+# compile. Build the browser bundle explicitly; its node_modules rule runs
+# `npm ci --offline` against the vendored node_shrinkpack/ (no registry
+# access, browser/Makefile.am:1214).
+make -j"$(nproc)" -C browser
+
 # Makefile.am's $(SYSTEM_STAMP) rule (lines 662-670) runs CLEANUP_COMMAND:
-# './coolwsd --cleanup ... || rm -f ./coolwsd'. If the freshly linked
-# coolwsd exits nonzero there (observed in CI run 28907904535: instant
-# silent failure), the '|| rm -f' DELETES the binary while make still
-# exits 0 — leaving a successful-looking build with no coolwsd. Relink it
+# './coolwsd --cleanup ... || rm -f ./coolwsd'. If coolwsd exits nonzero
+# there, the '|| rm -f' DELETES the binary while make still exits 0 —
+# leaving a successful-looking build with no coolwsd. Relink it
 # ('make coolwsd' does not depend on system_stamp, so the cleanup rule
 # does not re-fire) and re-run the exact cleanup invocation in the
 # foreground to surface its output and exit code for diagnosis. The smoke
@@ -71,8 +79,9 @@ if [ ! -x ./coolwsd ]; then
   set -e
 fi
 
-# BUILD-01 output assertions.
-test -x ./coolwsd
-test -d ./browser/dist
+# BUILD-01 output assertions — loud on failure so a missing artifact is
+# never a silent set -e death (cost us CI runs 28907904535 + 28908705828).
+test -x ./coolwsd || { echo "ERROR: ./coolwsd missing after build"; exit 1; }
+test -d ./browser/dist || { echo "ERROR: ./browser/dist missing after build"; exit 1; }
 
 echo "build.sh complete: ./coolwsd and ./browser/dist present."
