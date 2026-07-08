@@ -1,0 +1,22 @@
+sdk.collaboraonline.com
+forum.collaboraonline.com
+help.collaboraoffice.com
+www.collaboraonline.com
+www.collaboraoffice.org
+gerrit.collaboraoffice.com
+github.com/CollaboraOnline
+//collaboraonline.com
+Collabora Online Development Edition (unbranded)
+Collabora Online Development Edition
+collabora-office-white.svg
+collaborat
+Copyright the Collabora Online contributors
+Copyright Collabora Productivity
+:"Collabora Online"
+replace("Collabora Office"
+collabora-online-mobile
+prevent Collabora Online from updating
+Collabora Online server needs updating
+Collabora Online not loaded yet
+id="product-name">Collabora Online
+title="Collabora Online"
