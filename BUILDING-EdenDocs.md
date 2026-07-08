@@ -38,8 +38,8 @@ this build or its verification — it is permanently occupied by another
 application on the primary dev machine and must never be bound, served,
 curled, or referenced. `coolwsd` listens on its own **native port 9980**
 (Section 7); if you need an incidental local web server for anything
-unrelated to this pipeline, use **8091** instead. No script or command in
-this document uses 8080.
+unrelated to this pipeline, use **8091** instead. Never 8080 — no script
+or command in this document uses it.
 
 ## 2. Quick start
 
@@ -179,9 +179,14 @@ flags when troubleshooting a POCO problem; they will not help.
 `Zip` module (unlike the `codeql-analysis.yml` recipe it's adapted from,
 which omits it). Upstream `main`'s `wsd/Unzip.cpp` includes
 `Poco/Zip/Decompress.h`; omitting `Zip` fails the build at `wsd/Unzip.o`
-(proven in CI run 28906749089). If you're comparing this build's POCO
-`--omit=` list against `codeql-analysis.yml`'s, this is the one deliberate
-divergence.
+(proven in CI run 28906749089). The exact list of omitted POCO modules
+used (quoted verbatim from `scripts/eden/build-deps.sh` — `Zip` is
+deliberately absent from it, unlike the `codeql-analysis.yml` recipe this
+is adapted from):
+
+```
+--omit=Data,Data/SQLite,Data/ODBC,Data/MySQL,MongoDB,PDF,CppParser,PageCompiler,Redis,Encodings,ActiveRecord,Prometheus,JWT
+```
 
 For background on why upstream migrated POCO into the engine build in the
 first place (the in-tree-build story this fast path bypasses), see
