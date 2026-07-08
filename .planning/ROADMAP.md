@@ -145,7 +145,7 @@ must be decided before Objective 2 begins, per the note above).
 
 | Objective | Jobs Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. From-Source Build Pipeline | 3/3 | Complete   | 2026-07-08 |
+| 1. From-Source Build Pipeline | 3/3 | Complete    | 2026-07-08 |
 | 2. EdenDocs Rebrand of the Web UI | 0/TBD | Not started | - |
 | 3. AOID Authentication Integration (OIDC) | 0/TBD | Not started | - |
 | 4. EdenDocs-Branded Container Images | 0/TBD | Not started | - |
