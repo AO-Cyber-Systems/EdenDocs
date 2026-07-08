@@ -28,10 +28,18 @@ fi
 # below can inspect it. --enable-debug is required: it arms the
 # --with-lo-path versionrc hard-check (configure.ac:1765-1774), matching
 # codeql-analysis.yml's recipe and preventing a silently broken build.
+#
+# LDFLAGS=-L/usr/local/lib: the system-POCO fallback emits bare -lPoco*
+# with no -L (configure.ac:2090-2094), relying on the linker's built-in
+# search path. Debug builds auto-pick a fast linker (lld/mold/gold,
+# configure.ac:623-673), and gold/lld do NOT search /usr/local/lib by
+# default (only the bfd ld does) — without this, linking fails with
+# "cannot find -lPocoFoundation" et al. (proven in CI run 28907270901).
 CONFIGURE_LOG="$(mktemp)"
 ./configure --enable-silent-rules --enable-debug \
   --with-lokit-path="$PWD/engine/include" \
-  --with-lo-path="$PWD/engine/instdir" 2>&1 | tee "$CONFIGURE_LOG"
+  --with-lo-path="$PWD/engine/instdir" \
+  LDFLAGS="-L/usr/local/lib" 2>&1 | tee "$CONFIGURE_LOG"
 
 # BUILD-02 permanent assertion: this notice is SUCCESS for ENGINE_ASSETS
 # builds, not a warning to fix. The engine-main-assets.tar.gz ships no
