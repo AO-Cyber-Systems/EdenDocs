@@ -1,0 +1,25 @@
+/* -*- css -*- */
+/*
+ * Copyright the EdenDocs contributors / AO Cyber Systems.
+ *
+ * This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ */
+
+:root {
+  /* Eden UI gold ramp (PROJECT.md locked decision). !important is REQUIRED:
+   * the ?darkTheme=true script appendChild()s color-palette-dark.css AFTER
+   * this file in <head>, silently reverting non-!important overrides to
+   * Collabora blue (2-RESEARCH.md Pitfall 2). */
+  --color-primary: #D4A853 !important;          /* gold-500 */
+  --color-primary-dark: #A67A38 !important;     /* gold-700 */
+  --color-primary-darker: #856131 !important;   /* gold-800 */
+  --color-primary-lighter: #F4D5AA !important;  /* gold-200 (background use) */
+  /* Upstream white fails WCAG on the light-gold -lighter background: */
+  --color-primary-text: #3D2A14 !important;     /* gold-950 */
+  --color-btn-primary-hover-bg: #FAECD5 !important; /* gold-100 */
+  --color-overlay: #D4A85314 !important;        /* gold @ 8% alpha */
+  /* NOTE: --color-hyperlink is intentionally NOT overridden — it is a standard
+   * link affordance, not a trademark surface. Left at upstream. See README. */
+}
