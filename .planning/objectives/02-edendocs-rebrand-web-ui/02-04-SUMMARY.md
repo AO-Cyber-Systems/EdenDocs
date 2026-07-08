@@ -13,7 +13,7 @@ requires:
 provides:
   - "scripts/eden/build.sh — 4 branding configure flags (--with-app-branding/--with-app-name/--with-vendor/--with-help-url), brandProductName canary, coolwsd.xml brand-key injection (EdenDocs / https://aocyber.ai / eden-logo.svg), favicon + welcome build-time overlays, loud dist assertions"
   - "scripts/eden/smoke-test.sh — 6 runtime branding checks against coolwsd on native port 9980 (fetch-to-file pattern), incl. Basic-Auth admin-console BRAND-03 check"
-  - "Green end-to-end CI proof for BRAND-01/02/03/04/06 (run 28960901457)"
+  - "Green end-to-end CI proof for BRAND-01/02/03/04/06 (run 28960901457, commits 252f98ece5a / 60daa2727fc / 2bb08f0350f)"
 affects: [02-05-verification]
 
 # Tech tracking
@@ -56,7 +56,7 @@ completed: 2026-07-08
 
 # Objective 2 TRD 04: Build Wiring Summary
 
-**The from-source pipeline now builds the fully-branded EdenDocs tree: configure gets the four branding flags, generated coolwsd.xml carries the EdenDocs brand keys (canary-guarded), favicon/welcome are overlaid at build time, and six runtime branding checks pass against the live coolwsd on its native port 9980 — CI GREEN with `BRANDING SMOKE PASSED` in the logs.**
+**The from-source pipeline now builds the fully-branded EdenDocs tree: `scripts/eden/build.sh` gives configure the four branding flags and the generated coolwsd.xml the EdenDocs brand keys (canary-guarded) plus the build-time favicon/welcome overlays, while `scripts/eden/smoke-test.sh` proves six runtime branding checks against the live coolwsd on its native port 9980 — CI GREEN with `BRANDING SMOKE PASSED` in the logs.**
 
 ## Green-Run Evidence
 
