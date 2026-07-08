@@ -108,6 +108,20 @@ make -j"$(nproc)" build-nocheck
 # access, browser/Makefile.am:1214).
 make -j"$(nproc)" -C browser
 
+# EdenDocs branding overlays (BRAND-04): favicon has NO config override
+# (hardcoded filesystem lookup in wsd/ClientRequestDispatcher.cpp) — overlay
+# the served path directly. NOTE: this overwrites a TRACKED upstream file in
+# the working tree ON PURPOSE and it must NEVER be committed; restore
+# locally with: git checkout -- favicon.ico
+cp eden-branding/favicon.ico ./favicon.ico
+
+# browser/dist/welcome is unconditionally compiled with full Collabora
+# branding (the branding-dir welcome overlay is macOS-gated), so a partial
+# `cp eden-branding/welcome/*` would leave upstream slide/js assets in
+# place. Full replacement instead:
+rm -rf browser/dist/welcome
+cp -R eden-branding/welcome browser/dist/welcome
+
 # Makefile.am's $(SYSTEM_STAMP) rule (lines 662-670) runs CLEANUP_COMMAND:
 # './coolwsd --cleanup ... || rm -f ./coolwsd'. If coolwsd exits nonzero
 # there, the '|| rm -f' DELETES the binary while make still exits 0 —
@@ -130,5 +144,16 @@ fi
 # never a silent set -e death (cost us CI runs 28907904535 + 28908705828).
 test -x ./coolwsd || { echo "ERROR: ./coolwsd missing after build"; exit 1; }
 test -d ./browser/dist || { echo "ERROR: ./browser/dist missing after build"; exit 1; }
+
+# BRAND-04 branding-overlay assertions — loud on failure, same convention as
+# the BUILD-01 checks above.
+test -f browser/dist/branding.css || { echo "ERROR: browser/dist/branding.css missing after build"; exit 1; }
+test -f browser/dist/branding.js || { echo "ERROR: browser/dist/branding.js missing after build"; exit 1; }
+test -f browser/dist/images/toolbar-bg.svg || { echo "ERROR: browser/dist/images/toolbar-bg.svg missing after build"; exit 1; }
+grep -qi 'efb32c' browser/dist/images/collabora-office-white.svg || { echo "ERROR: browser/dist/images/collabora-office-white.svg was not overwritten with the AO emblem"; exit 1; }
+if grep -rqi collabora browser/dist/welcome/; then
+  echo "ERROR: browser/dist/welcome/ still references Collabora after overlay"
+  exit 1
+fi
 
 echo "build.sh complete: ./coolwsd and ./browser/dist present."

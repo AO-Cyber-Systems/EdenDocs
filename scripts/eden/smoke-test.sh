@@ -51,4 +51,20 @@ curl -fsS http://127.0.0.1:9980/hosting/discovery    | grep -q 'wopi-discovery' 
   || fail "/hosting/discovery did not serve wopi-discovery"
 curl -fsS http://127.0.0.1:9980/hosting/capabilities | grep -q 'convert-to' \
   || fail "/hosting/capabilities did not serve convert-to"
+
+# BRAND-01/02/03/04 runtime branding checks on the native port 9980:
+curl -fsS http://127.0.0.1:9980/browser/dist/cool.html | grep -q 'branding.css' \
+  || fail "served cool.html does not reference branding.css (BRAND-01 hook missing)"
+curl -fsS http://127.0.0.1:9980/browser/dist/cool.html | grep -q '<title>EdenDocs</title>' \
+  || fail "served cool.html title is not EdenDocs (BRAND-02)"
+curl -fsS http://127.0.0.1:9980/browser/dist/cool.html | grep -q 'AO Cyber Systems' \
+  || fail "served cool.html missing vendor 'AO Cyber Systems' (BRAND-02 --with-vendor)"
+curl -fsS http://127.0.0.1:9980/favicon.ico | cmp -s - eden-branding/favicon.ico \
+  || fail "served favicon is not the EdenDocs favicon (BRAND-04)"
+curl -fsS http://127.0.0.1:9980/browser/dist/images/eden-logo.svg | grep -qi 'efb32c' \
+  || fail "eden-logo.svg not served from dist images (BRAND-01 logoURL target)"
+curl -fsS -u admin:admin http://127.0.0.1:9980/browser/dist/admin/admin.html | grep -q 'branding.js' \
+  || fail "admin console page does not reference branding.js (BRAND-03 %BRANDING_JS% hook missing)"
+echo "BRANDING SMOKE PASSED: EdenDocs branding served on 9980"
+
 echo "SMOKE TEST PASSED: coolwsd serves /hosting/discovery and /hosting/capabilities on 9980"
