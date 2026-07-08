@@ -52,6 +52,25 @@ grep -q "POCO not found in the engine workdir, falling back to system POCO" "$CO
 
 make -j"$(nproc)" build-nocheck
 
+# Makefile.am's $(SYSTEM_STAMP) rule (lines 662-670) runs CLEANUP_COMMAND:
+# './coolwsd --cleanup ... || rm -f ./coolwsd'. If the freshly linked
+# coolwsd exits nonzero there (observed in CI run 28907904535: instant
+# silent failure), the '|| rm -f' DELETES the binary while make still
+# exits 0 — leaving a successful-looking build with no coolwsd. Relink it
+# ('make coolwsd' does not depend on system_stamp, so the cleanup rule
+# does not re-fire) and re-run the exact cleanup invocation in the
+# foreground to surface its output and exit code for diagnosis. The smoke
+# test remains the authoritative proof the binary actually runs.
+if [ ! -x ./coolwsd ]; then
+  echo "WARNING: ./coolwsd missing after make — CLEANUP_COMMAND deleted it. Relinking..."
+  make coolwsd
+  echo "--- cleanup diagnosis: re-running the CLEANUP_COMMAND coolwsd invocation ---"
+  set +e
+  ./coolwsd --disable-cool-user-checking --cleanup --o:logging.level=trace
+  echo "--- cleanup diagnosis exit code: $? ---"
+  set -e
+fi
+
 # BUILD-01 output assertions.
 test -x ./coolwsd
 test -d ./browser/dist
