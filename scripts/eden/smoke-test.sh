@@ -27,7 +27,8 @@ mkdir -p ./jails ./cache
   --o:storage.filesystem[@allow]=true \
   --o:admin_console.username=admin --o:admin_console.password=admin &
 COOLWSD_PID=$!
-trap 'kill "$COOLWSD_PID" 2>/dev/null || true' EXIT
+TMPD=$(mktemp -d)
+trap 'kill "$COOLWSD_PID" 2>/dev/null || true; rm -rf "$TMPD"' EXIT
 
 # On failure, surface coolwsd's file log — dev builds log to
 # /tmp/coolwsd.log (coolwsd.xml logging.file), so the step output alone
@@ -46,24 +47,41 @@ for _ in $(seq 1 120); do
   sleep 1
 done
 
-# Literal BUILD-04 checks on the native port 9980:
-curl -fsS http://127.0.0.1:9980/hosting/discovery    | grep -q 'wopi-discovery' \
+# Literal BUILD-04 checks on the native port 9980.
+# NEVER `curl | grep -q` here: grep -q exits at the first match and closes
+# the pipe, so any response larger than the pipe buffer gives curl EPIPE
+# (exit 23) and `set -o pipefail` turns a SUCCESSFUL match into a failure
+# (proven in CI run 28959752077 on debug-mode cool.html). Fetch each page
+# once to a file, then grep the file.
+curl -fsS http://127.0.0.1:9980/hosting/discovery -o "$TMPD/discovery.xml" \
+  || fail "could not fetch /hosting/discovery"
+grep -q 'wopi-discovery' "$TMPD/discovery.xml" \
   || fail "/hosting/discovery did not serve wopi-discovery"
-curl -fsS http://127.0.0.1:9980/hosting/capabilities | grep -q 'convert-to' \
+curl -fsS http://127.0.0.1:9980/hosting/capabilities -o "$TMPD/capabilities.json" \
+  || fail "could not fetch /hosting/capabilities"
+grep -q 'convert-to' "$TMPD/capabilities.json" \
   || fail "/hosting/capabilities did not serve convert-to"
 
 # BRAND-01/02/03/04 runtime branding checks on the native port 9980:
-curl -fsS http://127.0.0.1:9980/browser/dist/cool.html | grep -q 'branding.css' \
+curl -fsS http://127.0.0.1:9980/browser/dist/cool.html -o "$TMPD/cool.html" \
+  || fail "could not fetch /browser/dist/cool.html"
+grep -q 'branding.css' "$TMPD/cool.html" \
   || fail "served cool.html does not reference branding.css (BRAND-01 hook missing)"
-curl -fsS http://127.0.0.1:9980/browser/dist/cool.html | grep -q '<title>EdenDocs</title>' \
+grep -q '<title>EdenDocs</title>' "$TMPD/cool.html" \
   || fail "served cool.html title is not EdenDocs (BRAND-02)"
-curl -fsS http://127.0.0.1:9980/browser/dist/cool.html | grep -q 'AO Cyber Systems' \
+grep -q 'AO Cyber Systems' "$TMPD/cool.html" \
   || fail "served cool.html missing vendor 'AO Cyber Systems' (BRAND-02 --with-vendor)"
-curl -fsS http://127.0.0.1:9980/favicon.ico | cmp -s - eden-branding/favicon.ico \
+curl -fsS http://127.0.0.1:9980/favicon.ico -o "$TMPD/favicon.ico" \
+  || fail "could not fetch /favicon.ico"
+cmp -s "$TMPD/favicon.ico" eden-branding/favicon.ico \
   || fail "served favicon is not the EdenDocs favicon (BRAND-04)"
-curl -fsS http://127.0.0.1:9980/browser/dist/images/eden-logo.svg | grep -qi 'efb32c' \
+curl -fsS http://127.0.0.1:9980/browser/dist/images/eden-logo.svg -o "$TMPD/eden-logo.svg" \
+  || fail "could not fetch /browser/dist/images/eden-logo.svg"
+grep -qi 'efb32c' "$TMPD/eden-logo.svg" \
   || fail "eden-logo.svg not served from dist images (BRAND-01 logoURL target)"
-curl -fsS -u admin:admin http://127.0.0.1:9980/browser/dist/admin/admin.html | grep -q 'branding.js' \
+curl -fsS -u admin:admin http://127.0.0.1:9980/browser/dist/admin/admin.html -o "$TMPD/admin.html" \
+  || fail "could not fetch admin.html (admin:admin basic auth)"
+grep -q 'branding.js' "$TMPD/admin.html" \
   || fail "admin console page does not reference branding.js (BRAND-03 %BRANDING_JS% hook missing)"
 echo "BRANDING SMOKE PASSED: EdenDocs branding served on 9980"
 
