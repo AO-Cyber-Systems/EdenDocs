@@ -35,10 +35,35 @@ fi
 # configure.ac:623-673), and gold/lld do NOT search /usr/local/lib by
 # default (only the bfd ld does) — without this, linking fails with
 # "cannot find -lPocoFoundation" et al. (proven in CI run 28907270901).
+#
+# BRAND-01/02/03/04/06 branding flags (research 2-RESEARCH.md Pitfall 1):
+# --with-app-branding wires eden-branding/ into the APP_HAS_BRANDING copy
+# recipe in browser/Makefile.am (branding.css/js, images/*.svg overwrites,
+# toolbar-bg.svg rename, welcome/ dir). --with-app-name/--with-vendor feed
+# the product-name/vendor strings; --with-help-url sets the help link
+# target.
+#
+# HARD OMIT LIST — never pass any of the following to configure, ever:
+#   with-welcome-url, with-feedback-url, with-infobar-url,
+#   with-support-public-key
+# Passing with-welcome-url flips configure.ac's ENABLE_WELCOME_MESSAGE
+# branch (configure.ac:1316-1329), which SKIPS generating
+# CONFIG_INTERFACE_FRAGMENT entirely — silently deleting brandProductName,
+# brandProductURL, and logoURL from the generated coolwsd.xml with no
+# error (BRAND-01 dies silently). The canary assertion below is the
+# permanent guard against this regressing. Do NOT loosen it.
+#
+# with-info-url is intentionally NOT passed here: INFO_URL only feeds the
+# mobile-app m4 path, not the same key as brandProductURL — passing it
+# would do nothing for this web build.
 CONFIGURE_LOG="$(mktemp)"
 ./configure --enable-silent-rules --enable-debug \
   --with-lokit-path="$PWD/engine/include" \
   --with-lo-path="$PWD/engine/instdir" \
+  --with-app-branding="$PWD/eden-branding" \
+  --with-app-name="EdenDocs" \
+  --with-vendor="AO Cyber Systems" \
+  --with-help-url="https://aocyber.ai" \
   LDFLAGS="-L/usr/local/lib" 2>&1 | tee "$CONFIGURE_LOG"
 
 # BUILD-02 permanent assertion: this notice is SUCCESS for ENGINE_ASSETS
@@ -49,6 +74,28 @@ CONFIGURE_LOG="$(mktemp)"
 # ever fails, do NOT silently loosen it — inspect the configure log,
 # re-verify the tarball contents, and update BUILD-02 documentation.
 grep -q "POCO not found in the engine workdir, falling back to system POCO" "$CONFIGURE_LOG"
+
+# BRAND-01/BRAND-06 canary (research 2-RESEARCH.md Pitfall 1): brandProductName
+# only survives configure when no welcome URL is set. If this ever fails,
+# someone enabled a welcome URL — fix that, do NOT loosen this assertion.
+grep -q "<brandProductName" coolwsd.xml \
+  || { echo "ERROR: brandProductName key missing from generated coolwsd.xml — welcome-url dependency broken (see 2-RESEARCH.md Pitfall 1)"; exit 1; }
+
+# Inject the EdenDocs values into the GENERATED (gitignored) coolwsd.xml.
+# coolwsd.xml.in / configure.ac are never touched — only configure's OUTPUT
+# is post-processed here.
+python3 - <<'PYEOF'
+import re, pathlib
+p = pathlib.Path('coolwsd.xml')
+c = p.read_text()
+c = re.sub(r'(<brandProductName[^>]*>)[^<]*(</brandProductName>)', r'\1EdenDocs\2', c)
+c = re.sub(r'(<brandProductURL[^>]*>)[^<]*(</brandProductURL>)', r'\1https://aocyber.ai\2', c)
+c = re.sub(r'(<logoURL[^>]*>)[^<]*(</logoURL>)', r'\1images/eden-logo.svg\2', c)
+p.write_text(c)
+PYEOF
+
+grep -q ">EdenDocs</brandProductName>" coolwsd.xml || { echo "ERROR: brandProductName injection failed"; exit 1; }
+grep -q "aocyber.ai</brandProductURL>" coolwsd.xml || { echo "ERROR: brandProductURL injection failed"; exit 1; }
 
 make -j"$(nproc)" build-nocheck
 
