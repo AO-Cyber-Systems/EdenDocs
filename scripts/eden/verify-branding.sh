@@ -69,8 +69,8 @@ command grep -q 'AO Cyber Systems' browser/dist/cool.html \
 # --- Gate 3: BRAND-03 admin-console product name ---------------------------
 command grep -q 'window.brandProductName' browser/dist/branding.js \
   || { echo "ERROR: window.brandProductName missing from dist branding.js (BRAND-03)"; exit 1; }
-command grep -q 'window.brandProductName = "EdenDocs"' browser/dist/branding.js \
-  || { echo "ERROR: window.brandProductName is not \"EdenDocs\" in dist branding.js (BRAND-03)"; exit 1; }
+command grep -qE "window\.brandProductName = ['\"]EdenDocs['\"]" browser/dist/branding.js \
+  || { echo "ERROR: window.brandProductName is not 'EdenDocs' in dist branding.js (BRAND-03)"; exit 1; }
 
 # --- Gate 4: BRAND-04 palette + welcome ------------------------------------
 command grep -qF -- '--color-primary: #D4A853 !important' browser/dist/branding.css \
