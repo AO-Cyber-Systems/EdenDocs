@@ -41,25 +41,32 @@ sudo apt-get install -y \
 
 # Source-built POCO 1.12.5p2 — idempotent guard so re-running this script
 # (e.g. in a warm CI cache or a re-provisioned dev box) does not rebuild
-# POCO every time.
-if [ ! -f /usr/local/include/Poco/Net/WebSocket.h ]; then
+# POCO every time. The guard checks BOTH Net/WebSocket.h and
+# Zip/Decompress.h: a POCO installed by the older recipe (which omitted
+# Zip) must be rebuilt, not skipped.
+if [ ! -f /usr/local/include/Poco/Net/WebSocket.h ] || [ ! -f /usr/local/include/Poco/Zip/Decompress.h ]; then
   POCO_BUILD_DIR="$(mktemp -d)"
   (
     cd "$POCO_BUILD_DIR"
     wget --no-verbose https://pocoproject.org/releases/poco-1.12.5p2/poco-1.12.5p2-all.tar.gz
     tar xf poco-1.12.5p2-all.tar.gz
     cd poco-1.12.5p2-all
-    # Verbatim recipe from .github/workflows/codeql-analysis.yml (lines 56-61)
-    # — the only proven-working POCO build for ENGINE_ASSETS builds.
+    # Recipe from .github/workflows/codeql-analysis.yml (lines 56-61) with
+    # ONE divergence: Zip is NOT omitted. Upstream main's wsd/Unzip.cpp
+    # includes Poco/Zip/Decompress.h, so omitting Zip fails the build at
+    # wsd/Unzip.o (proven in CI run 28906749089, 2026-07-07) — the codeql
+    # omit list is stale for this tree. All other omitted modules were
+    # cross-checked against the compiled dirs (wsd/ common/ kit/ net/
+    # tools/) and none of their headers are included.
     ./configure --static --no-tests --no-samples --no-sharedlibs \
       --cflags="-fPIC" \
-      --omit=Zip,Data,Data/SQLite,Data/ODBC,Data/MySQL,MongoDB,PDF,CppParser,PageCompiler,Redis,Encodings,ActiveRecord,Prometheus,JWT
+      --omit=Data,Data/SQLite,Data/ODBC,Data/MySQL,MongoDB,PDF,CppParser,PageCompiler,Redis,Encodings,ActiveRecord,Prometheus,JWT
     make -j"$(nproc)"
     sudo make install
   )
   rm -rf "$POCO_BUILD_DIR"
 else
-  echo "System POCO already present at /usr/local/include/Poco/Net/WebSocket.h — skipping build."
+  echo "System POCO already present (Net/WebSocket.h + Zip/Decompress.h) — skipping build."
 fi
 
 echo "build-deps.sh complete: apt packages + system POCO 1.12.5p2 installed."
