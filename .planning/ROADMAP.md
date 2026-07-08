@@ -29,7 +29,7 @@ native runtime port is 9980.
 
 Decimal objectives appear between their surrounding integers in numeric order.
 
-- [ ] **Objective 1: From-Source Build Pipeline** - Build coolwsd + browser/dist from source on Linux via the prebuilt engine tarball, verified in CI on every push
+- [x] **Objective 1: From-Source Build Pipeline** - Build coolwsd + browser/dist from source on Linux via the prebuilt engine tarball, verified in CI on every push (completed 2026-07-08)
 - [ ] **Objective 2: EdenDocs Rebrand of the Web UI** - Editor and admin console show EdenDocs branding end-to-end; Collabora trademarks stripped, MPL attribution preserved
 - [ ] **Objective 3: AOID Authentication Integration (OIDC)** - A reference WOPI host authenticates users against AOID and surfaces their identity inside the editor
 - [ ] **Objective 4: EdenDocs-Branded Container Images** - Signed, branded container images built on the from-source pattern, verified through a real reverse proxy
@@ -145,7 +145,7 @@ must be decided before Objective 2 begins, per the note above).
 
 | Objective | Jobs Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. From-Source Build Pipeline | 2/3 | In Progress|  |
+| 1. From-Source Build Pipeline | 3/3 | Complete   | 2026-07-08 |
 | 2. EdenDocs Rebrand of the Web UI | 0/TBD | Not started | - |
 | 3. AOID Authentication Integration (OIDC) | 0/TBD | Not started | - |
 | 4. EdenDocs-Branded Container Images | 0/TBD | Not started | - |
