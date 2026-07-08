@@ -10,11 +10,11 @@ See: .planning/PROJECT.md (updated 2026-07-07)
 ## Current Position
 
 Objective: 1 of 5 (From-Source Build Pipeline)
-Job: 01-01 complete (build scripts); next 01-02 (CI workflow)
-Status: Executing — wave 1 of 3 complete
-Last activity: 2026-07-07 — Wave 1 done: scripts/eden/{fetch-engine-assets,build-deps,build,smoke-test}.sh created (4 atomic commits); BUILD-02 re-validated live (tarball is instdir-only, 0 poco/workdir entries → system-POCO fallback required and asserted in build.sh)
+Job: 01-02 complete (CI green end-to-end); next 01-03 (build doc)
+Status: Executing — wave 2 of 3 complete
+Last activity: 2026-07-08 — Wave 2 done: build.yml push-triggered CI GREEN on eden-main (cold run 28910753718 14m28s, warm run 28911376952 8m19s with 100% ccache hits). 5 fix cycles: +POCO Zip module, +LDFLAGS=/usr/local/lib, explicit `make -C browser` (build-nocheck never recurses SUBDIRS), setcap on coolforkit-caps/coolmount for the smoke test. BUILD-01/02/03/04 all log-evidenced.
 
-Progress: [█░░░░░░░░░] 7%
+Progress: [████░░░░░░] 13%
 
 ## Accumulated Context
 
