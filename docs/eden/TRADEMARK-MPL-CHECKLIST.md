@@ -42,7 +42,7 @@ BRAND-07, v2), container image LABELs (Objective 4 — see row in §3).
 | `brandProductName` / `brandProductURL` / `logoURL` config keys | 2 | Post-configure injection into generated (gitignored) `coolwsd.xml`: `EdenDocs` / `https://aocyber.ai` / `images/eden-logo.svg`; canary asserts keys exist (welcome-url dependency, §6) | 02-04 commit `252f98ece5a` | build.sh injection assertions + verify-branding.sh gate 7 canary |
 | About dialog product name + vendor | 1/2 | Config-driven: `#product-name` filled at runtime from `brandProductName` (= EdenDocs); vendor via `--with-vendor="AO Cyber Systems"` (AC_SUBST → m4 `VENDOR` expansion in cool.html) | 02-04 commit `252f98ece5a` | verify-branding.sh gate 2 (`AO Cyber Systems` in dist cool.html); static fallback text is a reviewed exception (§4 row 13) |
 | Admin console product name (`window.brandProductName`) | 1 | `eden-branding/branding.js` sets `window.brandProductName = "EdenDocs"` (admin console's only path to the value) | 02-03 commit `160335432f3` | verify-branding.sh gate 3; runtime admin-page check in smoke-test.sh |
-| Container image LABELs | — | **None exist** in `docker/from-source/{Ubuntu,Debian}` (verified clean — zero LABEL directives); Objective 4 owns any future Eden LABEL scheme | n/a (verified, no action) | Research §6 verified-clean list |
+| Container image LABELs / OCI annotations | 1/2 | EdenDocs OCI labels injected at CI via `docker/metadata-action` (vendor=AO Cyber Systems, title=EdenDocs, description, licenses=MPL-2.0, source=…/EdenDocs); NO `LABEL` directives in `docker/eden/Dockerfile`; no Collabora string on any image-identity surface | 04-01/02/04 (`docker/eden/Dockerfile` + `.github/workflows/docker-publish.yml`) | docker-publish.yml "LABEL identity + MPL-in-image integrity" step (asserts EdenDocs+vendor present, no Collabora brand form in Labels) |
 
 ## 4. Accepted exceptions (v1)
 
@@ -175,3 +175,61 @@ Partial evidence already banked:
   sweep-scope excludes were exact on first contact with the real dist tree.
 - `BRANDING SMOKE PASSED` (runtime half): runs 28964158981 and 28960901457.
 - Final `BRANDING VERIFICATION PASSED (BRAND-01..06)` line: pending green run.
+
+## 9. Container image surfaces (Objective 4 / DIST)
+
+Objective 4 publishes a signed, EdenDocs-branded container image. Objective 4
+adds ZERO upstream-file divergences: all container work is additive
+(`docker/eden/*`, `scripts/eden/*`, `.github/workflows/docker-publish.yml`), so
+the §7 divergence allowlist is UNCHANGED by this objective.
+
+**Image name.** `ghcr.io/ao-cyber-systems/edendocs` — lowercase (GHCR rejects
+the org's display casing on push; Pitfall 7). No Collabora trademark appears in
+the repository path or any published tag (`:main` / `:sha-<short>` / `:latest`).
+
+**LABEL / OCI annotation set.** Injected at CI via `docker/metadata-action` (NOT
+hardcoded in `docker/eden/Dockerfile`, which stays LABEL-free so it needs no
+per-release edit):
+
+| Annotation | Value |
+|------------|-------|
+| `org.opencontainers.image.vendor` | AO Cyber Systems |
+| `org.opencontainers.image.title` | EdenDocs |
+| `org.opencontainers.image.description` | Privacy-first self-hosted document editor |
+| `org.opencontainers.image.licenses` | MPL-2.0 |
+| `org.opencontainers.image.source` | https://github.com/AO-Cyber-Systems/EdenDocs |
+
+The user-facing image identity is EdenDocs. The workflow's "LABEL identity +
+MPL-in-image integrity" step asserts `title=EdenDocs` + `vendor=AO Cyber Systems`
+are present and that NO Collabora **brand form** (`Collabora Online/Office/
+Productivity` or the `collabora{online,office}` domains) appears on the LABEL
+surface — the ordinary English word "collaborat*" is not a trademark (see §4
+exception #12) and is not itself grounds for a failure.
+
+**MPL byte-integrity IN THE IMAGE.** `THIRDPARTYLICENSES` is installed into the
+image's doc dir by `make install` (`dist_doc_DATA`); `COPYING` (the MPL notice)
+is **not** installed by `make install`, so `docker-publish.yml` additively stages
+the repo's byte-identical `COPYING` beside it in the build context. The workflow
+then asserts, in-image, that BOTH files are present, that `COPYING` carries the
+`Mozilla Public` notice, and that each is **sha256-identical to the repo copy**
+(which §5 / verify-branding.sh gate 6 holds upstream-byte-intact). Per-file MPL
+headers are untouched — the image only `COPY`s a `make install` tree, with no
+source edits.
+
+**Signing (DIST-03).** The pushed image **digest** (not a mutable tag) is signed
+with **keyless cosign** (Sigstore / GitHub OIDC — `id-token: write`, no stored
+key, matching the uniform AO-Cyber-Systems org convention of zero key-based
+repos). A CycloneDX SBOM (syft) is attached via `cosign attest --type
+cyclonedx`, and the workflow self-verifies against the repo's OIDC identity:
+
+```
+cosign verify ghcr.io/ao-cyber-systems/edendocs@<digest> \
+  --certificate-identity-regexp="https://github.com/AO-Cyber-Systems/EdenDocs/.*" \
+  --certificate-oidc-issuer="https://token.actions.githubusercontent.com"
+```
+
+**Green-run evidence: pending.** The single integrated green `docker-publish.yml`
+run (the DIST-01 + DIST-02 + DIST-03 proof) is pending the first user-approved
+push of `eden-main` — a push triggers the live build+publish+sign, a rollout
+held for explicit approval. On green, record the run URL + published digest +
+`cosign verify` block here, mirroring §8.
