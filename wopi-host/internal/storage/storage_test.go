@@ -131,7 +131,7 @@ func TestFileIDTraversalRejected(t *testing.T) {
 				t.Fatalf("New: %v", err)
 			}
 
-			if _, err := store.Read(id); !errors.Is(err, ErrBadFileID) {
+			if _, _, err := store.Read(id); !errors.Is(err, ErrBadFileID) {
 				t.Errorf("Read(%q): got err %v, want ErrBadFileID", id, err)
 			}
 			if _, err := store.Write(id, bytes.NewReader([]byte("x"))); !errors.Is(err, ErrBadFileID) {
