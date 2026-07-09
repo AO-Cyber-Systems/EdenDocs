@@ -1,0 +1,225 @@
+name: docker-publish
+
+# EdenDocs branded RELEASE image publish (DIST-01 / DIST-02 / DIST-03).
+# This is a NEW, additive workflow: the sibling build.yml (the debug-enabled
+# dev/CI build + smoke) is left byte-untouched. On every push to eden-main (plus
+# manual dispatch) it: installs deps, fetches the sha256-PINNED engine (never the
+# rolling tag), runs the non-debug release build into docker/eden/instdir,
+# buildx-builds the branded 3-stage image (the verify-caps stage FAILS the build
+# if a capability xattr is dropped on COPY --from), boot-health-gates the pinned
+# engine (coolwsd accepts on 9980, no SIGSEGV), runs the >60s reverse-proxy
+# WebSocket smoke, Trivy-scans, pushes to ghcr.io/ao-cyber-systems/edendocs
+# (lowercase), and cosign-signs the immutable digest KEYLESS (Sigstore / GitHub
+# OIDC) with a CycloneDX SBOM attestation. Ports here are only coolwsd-native
+# 9980 and host-web 8091 (owned by scripts/eden/proxy-smoke-test.sh).
+on:
+  push:
+    branches: [eden-main]
+  workflow_dispatch:
+
+concurrency:
+  group: docker-publish-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read        # checkout
+  packages: write       # push to GHCR via the built-in GITHUB_TOKEN
+  id-token: write        # keyless cosign (Sigstore / Fulcio OIDC) — no stored key
+  attestations: write    # SBOM / attestation upload
+
+env:
+  # Lowercase — GHCR rejects the org's display casing on push (Pitfall 7).
+  IMAGE: ghcr.io/ao-cyber-systems/edendocs
+  CCACHE_DIR: /home/runner/.ccache
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+
+      # Node 20 LTS pinned — ubuntu-latest no longer ships Node 20 by default
+      # (mirrors build.yml's pin).
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - uses: docker/setup-buildx-action@v3
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Restore ccache
+        uses: actions/cache@v4
+        with:
+          path: /home/runner/.ccache
+          key: ccache-release-${{ hashFiles('configure.ac') }}
+          restore-keys: |
+            ccache-release-
+
+      - name: Install build dependencies + system POCO
+        run: ./scripts/eden/build-deps.sh
+
+      # RELEASE path: the PINNED, sha256-verified engine — NEVER
+      # fetch-engine-assets.sh (the volatile rolling tag). fetch-engine-pinned.sh
+      # hard-fails on any digest drift and refuses the known-SIGSEGV engine.
+      - name: Fetch PINNED engine (sha256-verified)
+        run: ./scripts/eden/fetch-engine-pinned.sh
+
+      - name: Non-debug release build -> docker/eden/instdir
+        run: ./scripts/eden/build-release.sh
+
+      # `make install` stages THIRDPARTYLICENSES (dist_doc_DATA) into the image's
+      # doc dir but NOT COPYING (the MPL notice). Additively drop the repo's
+      # byte-identical COPYING beside it in the build context so the published
+      # image ships BOTH license files (asserted below + in the checklist).
+      - name: Stage MPL COPYING into the image build context
+        run: |
+          set -euo pipefail
+          tpl="$(find docker/eden/instdir -type f -name THIRDPARTYLICENSES | head -1)"
+          test -n "$tpl" || { echo "FATAL: THIRDPARTYLICENSES not staged by build-release.sh"; exit 1; }
+          cp COPYING "$(dirname "$tpl")/COPYING"
+          echo "Staged COPYING next to $tpl for in-image MPL completeness."
+
+      - name: Metadata (tags + EdenDocs OCI labels)
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.IMAGE }}
+          tags: |
+            type=raw,value=main
+            type=sha,prefix=sha-,format=short
+            type=raw,value=latest
+          labels: |
+            org.opencontainers.image.vendor=AO Cyber Systems
+            org.opencontainers.image.title=EdenDocs
+            org.opencontainers.image.description=Privacy-first self-hosted document editor
+            org.opencontainers.image.licenses=MPL-2.0
+            org.opencontainers.image.source=https://github.com/AO-Cyber-Systems/EdenDocs
+
+      # Build once and LOAD locally as :scan. The Dockerfile's verify-caps stage
+      # runs IN this build and fails it if cap_sys_chroot / cap_sys_admin were
+      # dropped on COPY --from (DIST-02 capability half). No LABELs in the
+      # Dockerfile: OCI labels are injected here via steps.meta.outputs.labels.
+      - name: Build image (:scan, load) — verify-caps runs in-build
+        uses: docker/build-push-action@v6
+        with:
+          context: docker/eden
+          file: docker/eden/Dockerfile
+          build-args: |
+            base_image=ubuntu:24.04
+          load: true
+          tags: ${{ env.IMAGE }}:scan
+          labels: ${{ steps.meta.outputs.labels }}
+
+      # Boot-health gate (engine-pin decision (b), defense-in-depth over the
+      # sha256 pin): the PINNED engine must actually boot in the final image —
+      # coolwsd accepts on 9980 with no SIGSEGV. Abort the publish on any crash.
+      - name: Boot-health gate (pinned engine boots, no SIGSEGV, accepts on 9980)
+        run: |
+          set -euo pipefail
+          docker run -d --name edendocs-boot \
+            --cap-add MKNOD --cap-add SYS_CHROOT --cap-add FOWNER --cap-add CHOWN --cap-add SYS_ADMIN \
+            -e "extra_params=--o:ssl.enable=false" "${{ env.IMAGE }}:scan"
+          ok=0
+          for _ in $(seq 1 120); do
+            if docker exec edendocs-boot /usr/bin/coolwsd --probe >/dev/null 2>&1; then ok=1; break; fi
+            sleep 1
+          done
+          docker logs edendocs-boot | tail -n 50 || true
+          docker rm -f edendocs-boot >/dev/null 2>&1 || true
+          if [ "$ok" != 1 ]; then
+            echo "FATAL: coolwsd never accepted on 9980 (pinned engine boot-health failed)"
+            exit 1
+          fi
+          echo "BOOT HEALTH PASSED: coolwsd accepts on 9980, no SIGSEGV"
+
+      # Image identity + MPL byte-integrity. LABELs must read EdenDocs /
+      # AO Cyber Systems and carry NO Collabora trademark; COPYING +
+      # THIRDPARTYLICENSES must be present in-image and byte-identical to the repo
+      # copies (which verify-branding.sh gate 6 holds upstream-byte-intact). The
+      # anti-trademark grep targets the brand forms (Collabora Online/Office/
+      # Productivity or the collabora{online,office} domains), not the English
+      # word "collaborat*" — see checklist §4 exception #12.
+      - name: LABEL identity + MPL-in-image integrity
+        run: |
+          set -euo pipefail
+          docker inspect --format '{{json .Config.Labels}}' "${{ env.IMAGE }}:scan" | tee labels.json
+          grep -q 'EdenDocs' labels.json
+          grep -q 'AO Cyber Systems' labels.json
+          if grep -iE 'collabora (online|office|productivity)|collabora(online|office)\.(com|org)|collaboraoffice' labels.json; then
+            echo "FATAL: Collabora trademark on image LABEL identity surface"
+            exit 1
+          fi
+          repo_copying="$(sha256sum COPYING | cut -d' ' -f1)"
+          repo_tpl="$(sha256sum THIRDPARTYLICENSES | cut -d' ' -f1)"
+          docker run --rm --entrypoint sh "${{ env.IMAGE }}:scan" -c '
+            set -e
+            t="$(find / -type f -name THIRDPARTYLICENSES 2>/dev/null | head -1)"
+            test -n "$t" || { echo "FATAL: THIRDPARTYLICENSES absent from image"; exit 1; }
+            c="$(dirname "$t")/COPYING"
+            test -f "$c" || { echo "FATAL: COPYING absent from image (expected beside THIRDPARTYLICENSES)"; exit 1; }
+            grep -q "Mozilla Public" "$c" || { echo "FATAL: image COPYING lacks the MPL notice"; exit 1; }
+            echo "IMG_COPYING=$(sha256sum "$c" | cut -d" " -f1)"
+            echo "IMG_TPL=$(sha256sum "$t" | cut -d" " -f1)"
+          ' | tee mpl.txt
+          img_copying="$(awk -F= '/^IMG_COPYING=/{print $2}' mpl.txt)"
+          img_tpl="$(awk -F= '/^IMG_TPL=/{print $2}' mpl.txt)"
+          test "$img_copying" = "$repo_copying" || { echo "FATAL: image COPYING byte-drift vs repo"; exit 1; }
+          test "$img_tpl" = "$repo_tpl" || { echo "FATAL: image THIRDPARTYLICENSES byte-drift vs repo"; exit 1; }
+          echo "MPL-IN-IMAGE PASSED: COPYING + THIRDPARTYLICENSES present, MPL, byte-identical to repo; LABELs=EdenDocs, no Collabora."
+
+      # DIST-02 proxy half: a document WebSocket session must survive >60s through
+      # the VERBATIM etc/nginx/coolwsd.conf reverse proxy (host web port 8091),
+      # with a short-timeout negative control proving the harness discriminates.
+      - name: Reverse-proxy >60s WebSocket smoke
+        run: ./scripts/eden/proxy-smoke-test.sh "${{ env.IMAGE }}:scan"
+
+      # Security gate: block the publish on fixable HIGH/CRITICAL CVEs.
+      - name: Trivy scan (block HIGH/CRITICAL)
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: ${{ env.IMAGE }}:scan
+          exit-code: '1'
+          severity: 'HIGH,CRITICAL'
+          ignore-unfixed: 'true'
+
+      # Push the multi-tag image (:main / :sha-<short> / :latest) with the EdenDocs
+      # OCI LABELs; cache-hits the :scan build above. provenance:false keeps the
+      # pushed digest a plain single-platform image manifest so the digest we sign
+      # is unambiguous (the CycloneDX SBOM is provided by the cosign attest below).
+      - name: Push (multi-tag) to GHCR
+        id: push
+        uses: docker/build-push-action@v6
+        with:
+          context: docker/eden
+          file: docker/eden/Dockerfile
+          build-args: |
+            base_image=ubuntu:24.04
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          provenance: false
+
+      - uses: sigstore/cosign-installer@v3
+      - uses: anchore/sbom-action/download-syft@v0
+
+      # DIST-03: keyless cosign (Sigstore / GitHub OIDC — no stored key) signs the
+      # immutable digest, attaches a CycloneDX SBOM attestation, and self-verifies
+      # against the repo's OIDC identity (uniform AO-Cyber-Systems org convention).
+      - name: Cosign keyless sign + SBOM attest + verify
+        run: |
+          set -euo pipefail
+          ref="${{ env.IMAGE }}@${{ steps.push.outputs.digest }}"
+          cosign sign --yes "$ref"
+          syft "$ref" -o cyclonedx-json > sbom.cdx.json
+          cosign attest --yes --predicate sbom.cdx.json --type cyclonedx "$ref"
+          cosign verify "$ref" \
+            --certificate-identity-regexp="https://github.com/AO-Cyber-Systems/EdenDocs/.*" \
+            --certificate-oidc-issuer="https://token.actions.githubusercontent.com"
+          echo "COSIGN KEYLESS SIGN + ATTEST + VERIFY PASSED for $ref"
