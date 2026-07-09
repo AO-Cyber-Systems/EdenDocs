@@ -38,10 +38,12 @@ func testKey(t *testing.T) *rsa.PrivateKey {
 }
 
 // nowTicks returns .NET ticks (100ns units since 0001-01-01 UTC) for the
-// current instant, mirroring the X-WOPI-TimeStamp convention.
+// current instant, mirroring the X-WOPI-TimeStamp convention. Computed via
+// the Unix-epoch offset (see ticksToUnixEpoch in proof.go) rather than
+// time.Since(year1) directly — the latter saturates time.Duration's
+// int64-nanosecond range long before reaching a 2020s "now".
 func nowTicks() int64 {
-	epoch := time.Date(1, 1, 1, 0, 0, 0, 0, time.UTC)
-	return time.Since(epoch).Nanoseconds() / 100
+	return ticksToUnixEpoch + time.Now().UnixNano()/100
 }
 
 // signProof is a genuine mirror of coolwsd's wsd/ProofKey.cpp SignProof:
