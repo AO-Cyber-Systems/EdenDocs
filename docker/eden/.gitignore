@@ -1,0 +1,2 @@
+# Build-time staging tree produced by scripts/eden/build-release.sh — never commit.
+instdir/

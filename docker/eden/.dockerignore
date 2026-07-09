@@ -1,0 +1,6 @@
+# Build context is docker/eden/. instdir/ is the payload; keep it. Exclude cruft
+# so `docker build docker/eden/` never uploads planning/VCS/editor files.
+**/.git
+**/.gitignore
+**/.DS_Store
+*.md
