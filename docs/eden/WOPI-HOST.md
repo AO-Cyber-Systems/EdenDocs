@@ -164,6 +164,16 @@ repo root, docker otherwise. See `wopi-host/scripts/wopi-e2e.sh` for the
 full 10-assertion list and `03-04-SUMMARY.md` for a captured passing
 transcript.
 
+**Verified against real AOID on 2026-07-09, issuer `https://localhost:8443`
+(local dev instance)** — full browser walkthrough by a human operator: AOID
+login redirect, editor iframe loaded hello.odt, AOID display name rendered
+in the editor, save round-tripped without error. One caveat for the record:
+AOID's login surface is federation-only, so the login credential hop rode a
+locally-registered upstream dev IdP (this repo's fake-aoid, JIT-provisioning
+the account into the real AOID) — every AOID↔wopi-host leg (session,
+authorization code, token exchange, JWKS verification) was the real
+instance.
+
 ## 3. Env reference
 
 Every setting is `EDENDOCS_WOPI_`-prefixed (source of truth:

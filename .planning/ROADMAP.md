@@ -31,7 +31,7 @@ Decimal objectives appear between their surrounding integers in numeric order.
 
 - [x] **Objective 1: From-Source Build Pipeline** - Build coolwsd + browser/dist from source on Linux via the prebuilt engine tarball, verified in CI on every push (completed 2026-07-08)
 - [ ] **Objective 2: EdenDocs Rebrand of the Web UI** - Editor and admin console show EdenDocs branding end-to-end; Collabora trademarks stripped, MPL attribution preserved
-- [ ] **Objective 3: AOID Authentication Integration (OIDC)** - A reference WOPI host authenticates users against AOID and surfaces their identity inside the editor
+- [x] **Objective 3: AOID Authentication Integration (OIDC)** - A reference WOPI host authenticates users against AOID and surfaces their identity inside the editor (completed 2026-07-09)
 - [ ] **Objective 4: EdenDocs-Branded Container Images** - Signed, branded container images built on the from-source pattern, verified through a real reverse proxy
 - [ ] **Objective 5: Upstream Tracking Workflow** - A written, owned merge cadence and divergence allowlist keep eden-main mergeable against the fast-moving mirror
 
@@ -155,7 +155,7 @@ must be decided before Objective 2 begins, per the note above).
 |-------|----------------|--------|-----------|
 | 1. From-Source Build Pipeline | 3/3 | Complete    | 2026-07-08 |
 | 2. EdenDocs Rebrand of the Web UI | 4/5 | In Progress|  |
-| 3. AOID Authentication Integration (OIDC) | 1/5 | In Progress|  |
+| 3. AOID Authentication Integration (OIDC) | 5/5 | Complete   | 2026-07-09 |
 | 4. EdenDocs-Branded Container Images | 0/TBD | Not started | - |
 | 5. Upstream Tracking Workflow | 0/TBD | Not started | - |
 
