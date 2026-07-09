@@ -138,6 +138,12 @@ with a PAT that has read access to `AO-Cyber-Systems/eden-platform-go` (same sec
 - **build.yml is EXPECTED red** at its pre-existing engine smoke step (upstream engine-tarball SIGSEGV — BLOCKED-EXOGENOUS, owned by Objective 2's 02-05 rerun action, see STATE.md). Our appended e2e step rides after it; its first green happens when the engine republish lands. Do not thrash CI over that redness.
 - Local docker-mode e2e is the **verification of record** while the engine blocker holds (per TRD `<verification>`).
 
+## Orchestrator CI Evidence (post-merge push, 2026-07-09)
+
+- Pushed eden-main `7b0ec91787c..f132f891102` to origin.
+- **wopi-host.yml run 28991066118: FAILURE at "Download modules"** — exact signature of the documented GITOPS_PAT gap (`git ls-remote https://github.com/aocybersystems/eden-platform-go … exit status 128`; the warn branch printed "WARN: GITOPS_PAT secret not set"). No code defect: the same module graph vets/builds/tests green locally. The `<build>` gate remains **OPEN pending user setup** — rerun via `gh run rerun 28991066118 --repo AO-Cyber-Systems/EdenDocs` (or push) after `gh secret set GITOPS_PAT --repo AO-Cyber-Systems/EdenDocs`.
+- build.yml run 28991066192: triggered by the same push; expected red at the pre-existing engine smoke step (02-05's BLOCKED-EXOGENOUS SIGSEGV). Recorded separately when complete.
+
 ## Self-Check: PASSED
 
 - Files exist: wopi-host/cmd/wopi-host/main.go, wopi-host/cmd/e2e-probe/main.go, wopi-host/scripts/wopi-e2e.sh (executable), .github/workflows/wopi-host.yml, build.yml additive block — all FOUND.
