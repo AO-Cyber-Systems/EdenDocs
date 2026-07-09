@@ -34,6 +34,7 @@ import (
 	"flag"
 	"fmt"
 	"log"
+	"net/http"
 	"net/url"
 	"os"
 	"strings"
@@ -65,7 +66,18 @@ func main() {
 	}
 	fmt.Fprintf(os.Stderr, "e2e-probe: dialing %s\n", wsURL)
 
-	conn, resp, err := websocket.DefaultDialer.Dial(wsURL, nil)
+	// coolwsd's allowedOrigin (wsd/ClientRequestDispatcher.cpp) rejects any
+	// WS upgrade without an Origin header with a raw HTTP 403. In real usage
+	// the socket is opened by cool.html, which coolwsd itself serves — so the
+	// browser's Origin IS coolwsd's own origin. Mirror that exactly.
+	origin, err := coolwsdOrigin(*coolwsdURLFlag)
+	if err != nil {
+		log.Fatalf("e2e-probe: deriving Origin from -coolwsd-url: %v", err)
+	}
+	hdr := http.Header{}
+	hdr.Set("Origin", origin)
+
+	conn, resp, err := websocket.DefaultDialer.Dial(wsURL, hdr)
 	if err != nil {
 		status := "n/a"
 		if resp != nil {
@@ -188,6 +200,19 @@ func buildWSURL(coolwsdBase, wopiSrc, token, ttl string) (wsURL string, docurl s
 		"?WOPISrc=" + url.QueryEscape(wopiSrc) + "&compat=" + "/ws"
 
 	return wsURL, docurl, nil
+}
+
+// coolwsdOrigin reduces the coolwsd base URL to its origin
+// (scheme://host[:port]) for the WS upgrade's Origin header.
+func coolwsdOrigin(coolwsdBase string) (string, error) {
+	base, err := url.Parse(coolwsdBase)
+	if err != nil {
+		return "", fmt.Errorf("parsing -coolwsd-url %q: %w", coolwsdBase, err)
+	}
+	if base.Scheme == "" || base.Host == "" {
+		return "", fmt.Errorf("-coolwsd-url %q must be an absolute http(s) URL", coolwsdBase)
+	}
+	return base.Scheme + "://" + base.Host, nil
 }
 
 func truncate(s string, n int) string {
