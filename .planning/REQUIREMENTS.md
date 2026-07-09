@@ -25,10 +25,10 @@ Requirements for initial release. Each maps to roadmap objectives.
 
 ### Authentication (AOID)
 
-- [ ] **AUTH-01**: A reference WOPI host service (new deployable, outside this repo's wsd/browser tree) authenticates users against AOID via OIDC Authorization Code flow
-- [ ] **AUTH-02**: The WOPI host implements CheckFileInfo/GetFile/PutFile, mints short-lived WOPI access_tokens, and serves a launch page embedding the editor iframe
+- [x] **AUTH-01**: A reference WOPI host service (new deployable, outside this repo's wsd/browser tree) authenticates users against AOID via OIDC Authorization Code flow
+- [x] **AUTH-02**: The WOPI host implements CheckFileInfo/GetFile/PutFile, mints short-lived WOPI access_tokens, and serves a launch page embedding the editor iframe
 - [ ] **AUTH-03**: AOID identity is visible in the editor UI (UserFriendlyName, avatar, IsAdminUser passed through CheckFileInfo)
-- [ ] **AUTH-04**: coolwsd trusts the WOPI host via `storage.wopi.alias_groups` (`mode="groups"`) with proof-key validation enabled — no OIDC code added to `wsd/`
+- [x] **AUTH-04**: coolwsd trusts the WOPI host via `storage.wopi.alias_groups` (`mode="groups"`) with proof-key validation enabled — no OIDC code added to `wsd/`
 
 ### Container Images
 
@@ -82,10 +82,10 @@ Which objectives cover which requirements. Updated during roadmap creation.
 | BRAND-04 | Objective 2 - EdenDocs Rebrand of the Web UI | Complete |
 | BRAND-05 | Objective 2 - EdenDocs Rebrand of the Web UI | Pending |
 | BRAND-06 | Objective 2 - EdenDocs Rebrand of the Web UI | Complete |
-| AUTH-01 | Objective 3 - AOID Authentication Integration (OIDC) | Pending |
-| AUTH-02 | Objective 3 - AOID Authentication Integration (OIDC) | Pending |
+| AUTH-01 | Objective 3 - AOID Authentication Integration (OIDC) | Complete |
+| AUTH-02 | Objective 3 - AOID Authentication Integration (OIDC) | Complete |
 | AUTH-03 | Objective 3 - AOID Authentication Integration (OIDC) | Pending |
-| AUTH-04 | Objective 3 - AOID Authentication Integration (OIDC) | Pending |
+| AUTH-04 | Objective 3 - AOID Authentication Integration (OIDC) | Complete |
 | DIST-01 | Objective 4 - EdenDocs-Branded Container Images | Pending |
 | DIST-02 | Objective 4 - EdenDocs-Branded Container Images | Pending |
 | DIST-03 | Objective 4 - EdenDocs-Branded Container Images | Pending |
