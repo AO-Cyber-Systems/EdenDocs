@@ -73,6 +73,14 @@ type Config struct {
 	// RequireProof controls whether the WOPI protocol surface (TRD 03-03)
 	// enforces coolwsd's X-WOPI-Proof signature verification. Default true.
 	RequireProof bool
+
+	// OIDCCAFile is an optional path to a PEM CA bundle used to verify
+	// AOIDIssuer's TLS certificate on outbound OIDC calls (discovery, token
+	// exchange, JWKS). Empty (the default) means the system trust store.
+	// This exists for local-dev AOID instances serving a private dev CA
+	// (e.g. the aoid repo's deploy/tls bundle) — it ADDS a trust root
+	// explicitly and never disables verification.
+	OIDCCAFile string
 }
 
 // bannedPort is the project-wide banned port substring. Never use it for
@@ -90,6 +98,7 @@ func FromEnv() (Config, error) {
 		CoolwsdURL:   getEnv("EDENDOCS_WOPI_COOLWSD_URL", "http://127.0.0.1:9980"),
 		DataDir:      getEnv("EDENDOCS_WOPI_DATA_DIR", "./data"),
 		RequireProof: true,
+		OIDCCAFile:   os.Getenv("EDENDOCS_WOPI_OIDC_CA_FILE"),
 	}
 
 	// PublicURL's default is derived from the resolved ListenAddr (not a
@@ -153,10 +162,10 @@ func (c Config) Redacted() Config {
 func (c Config) String() string {
 	r := c.Redacted()
 	return fmt.Sprintf(
-		"{ListenAddr:%s PublicURL:%s WopiBaseURL:%s AOIDIssuer:%s ClientID:%s ClientSecret:%s StateHMACKey:%s CoolwsdURL:%s DataDir:%s WopiTokenTTL:%s RequireProof:%t}",
+		"{ListenAddr:%s PublicURL:%s WopiBaseURL:%s AOIDIssuer:%s ClientID:%s ClientSecret:%s StateHMACKey:%s CoolwsdURL:%s DataDir:%s WopiTokenTTL:%s RequireProof:%t OIDCCAFile:%s}",
 		r.ListenAddr, r.PublicURL, r.WopiBaseURL, r.AOIDIssuer, r.ClientID,
 		r.ClientSecret, string(r.StateHMACKey), r.CoolwsdURL, r.DataDir,
-		r.WopiTokenTTL, r.RequireProof,
+		r.WopiTokenTTL, r.RequireProof, r.OIDCCAFile,
 	)
 }
 

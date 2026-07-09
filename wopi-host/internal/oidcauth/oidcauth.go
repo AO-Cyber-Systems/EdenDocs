@@ -24,10 +24,13 @@ package oidcauth
 
 import (
 	"context"
+	"crypto/tls"
+	"crypto/x509"
 	"errors"
 	"fmt"
 	"net/http"
 	"net/url"
+	"os"
 	"strings"
 	"time"
 
@@ -85,6 +88,12 @@ type Authenticator struct {
 	inflight     oidcrp.InFlightStore
 	sessions     *session.Store
 	secureCookie bool
+
+	// httpClient, when non-nil, overrides the HTTP client used for every
+	// outbound OIDC call (token exchange; discovery/JWKS capture it at
+	// construction time via oidc.ClientContext). Set from
+	// config.OIDCCAFile to trust a private AOID dev CA.
+	httpClient *http.Client
 }
 
 // NewAuthenticator discovers cfg.AOIDIssuer, builds a VerifierCache-backed
@@ -99,6 +108,20 @@ func NewAuthenticator(ctx context.Context, cfg config.Config, sessions *session.
 	}
 	if sessions == nil {
 		return nil, errors.New("oidcauth: sessions store is required")
+	}
+
+	// Optional private-CA trust for the issuer (config.OIDCCAFile).
+	// oidc.ClientContext plants the client where BOTH go-oidc discovery/
+	// JWKS fetches and oauth2's token exchange look for it; go-oidc's
+	// NewProvider additionally retains it for all later JWKS refreshes.
+	var httpClient *http.Client
+	if cfg.OIDCCAFile != "" {
+		c, err := newHTTPClientForCA(cfg.OIDCCAFile)
+		if err != nil {
+			return nil, err
+		}
+		httpClient = c
+		ctx = oidc.ClientContext(ctx, httpClient)
 	}
 
 	providers := oidcrp.NewProviderCache()
@@ -128,6 +151,31 @@ func NewAuthenticator(ctx context.Context, cfg config.Config, sessions *session.
 		inflight:     oidcrp.NewInMemoryInFlightStore(),
 		sessions:     sessions,
 		secureCookie: strings.HasPrefix(cfg.PublicURL, "https://"),
+		httpClient:   httpClient,
+	}, nil
+}
+
+// newHTTPClientForCA builds an *http.Client whose TLS root set is exactly
+// the PEM certificates in path. Verification is never disabled — an
+// unreadable file or a file with no valid PEM certificates is a hard error,
+// not a silent fallback.
+func newHTTPClientForCA(path string) (*http.Client, error) {
+	pemBytes, err := os.ReadFile(path)
+	if err != nil {
+		return nil, fmt.Errorf("oidcauth: reading EDENDOCS_WOPI_OIDC_CA_FILE: %w", err)
+	}
+	pool := x509.NewCertPool()
+	if !pool.AppendCertsFromPEM(pemBytes) {
+		return nil, fmt.Errorf("oidcauth: no valid PEM certificates in EDENDOCS_WOPI_OIDC_CA_FILE %q", path)
+	}
+	return &http.Client{
+		Timeout: 30 * time.Second,
+		Transport: &http.Transport{
+			TLSClientConfig: &tls.Config{
+				RootCAs:    pool,
+				MinVersion: tls.VersionTLS12,
+			},
+		},
 	}, nil
 }
 
@@ -180,6 +228,11 @@ func (a *Authenticator) LoginHandler(w http.ResponseWriter, r *http.Request) {
 // allowlisted return path.
 func (a *Authenticator) CallbackHandler(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
+	if a.httpClient != nil {
+		// Token exchange must ride the same private-CA-trusting client as
+		// discovery (oauth2 reads it from this context key).
+		ctx = oidc.ClientContext(ctx, a.httpClient)
+	}
 	q := r.URL.Query()
 
 	st, err := oidcrp.VerifyState(a.stateKey, q.Get("state"), stateMaxAge)

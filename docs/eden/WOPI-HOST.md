@@ -182,6 +182,7 @@ Every setting is `EDENDOCS_WOPI_`-prefixed (source of truth:
 | `EDENDOCS_WOPI_DATA_DIR` | `./data` | Filesystem root the storage package reads/writes documents from — a reference/demo store, not S3 or similar (3-RESEARCH.md Open Question 4; a documented, deliberate v1 scope reduction, not an oversight). |
 | `EDENDOCS_WOPI_TOKEN_TTL` | `15m` (Go duration syntax) | Lifetime of a minted WOPI `access_token`. |
 | `EDENDOCS_WOPI_REQUIRE_PROOF` | `true` | Whether `X-WOPI-Proof` signature verification (§5) is enforced. Only ever set `false` for isolated local debugging — never in CI or production. |
+| `EDENDOCS_WOPI_OIDC_CA_FILE` | *(none — system trust store)* | Optional path to a PEM CA bundle used to verify the **issuer's TLS certificate** on outbound OIDC calls (discovery, token exchange, JWKS). Exists for local-dev AOID instances serving a private dev CA (e.g. `~/dev/aoid/deploy/tls/ca.crt`). It *adds* an explicit trust root — TLS verification is never disabled, and there is deliberately no skip-verify option. |
 | `EDENDOCS_WOPI_LOG_FILE` | *(none — stdout only)* | When set, logs are ALSO appended to this file (in addition to stdout) — the structured log-line contract `wopi-host/scripts/wopi-e2e.sh` greps (`wopi: CheckFileInfo...status=200`, `proof: verified ok`, etc.). |
 
 ## 4. AOID client registration runbook
