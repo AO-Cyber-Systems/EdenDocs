@@ -241,6 +241,18 @@ wires that adapter, a human cannot complete an interactive login against a
 locally-booted AOID, so end-to-end human verification of this integration
 is blocked on the AOID side, not on EdenDocs.
 
+*Resolved 2026-07-09: aoid commit `9d53d31` (branch
+`fix/oidc-idtoken-email-claims`) wires the adapter to the chassis wrap
+cipher; registration works on wrap-key (`AOID_KMS_WRAP_KEY`) deployments.
+Two related dev-setup facts remain: (a)
+`tenants.federation_return_url_allowlist` has no admin-RPC surface — set it
+with the same direct `UPDATE` AOID's own `cmd/aoid/dev_seed_e2e.go` issues
+(an empty allowlist rejects every federation login with
+`invalid_return_url`); (b) AOID's login surface is federation-only, so a
+local dev run needs an upstream IdP (e.g. this repo's fake-aoid) registered
+via `CreateExternalIdP` + `UpsertFederationPolicy` (JIT) +
+`AddClientIdPOption`.*
+
 ## 5. coolwsd trust (production)
 
 The ONLY change coolwsd needs for this entire objective is config, not
