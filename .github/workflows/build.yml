@@ -58,3 +58,31 @@ jobs:
       # no-phone-home assertions (runtime checks live in smoke-test.sh).
       - name: Verify EdenDocs branding + trademark/MPL gates
         run: ./scripts/eden/verify-branding.sh
+
+      # --- AUTH-01..04 (objective 03, TRD 03-04): additive steps only below
+      # this line — never reorder or modify the steps above. ---
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.26'
+          cache-dependency-path: wopi-host/go.sum
+
+      # Proven pattern — copied verbatim from aofamily
+      # .github/workflows/browser.yml (private eden-platform-go fetch).
+      - name: Configure private-module fetch
+        env:
+          GO_PRIVATE_TOKEN: ${{ secrets.GITOPS_PAT }}
+        run: |
+          if [ -n "$GO_PRIVATE_TOKEN" ]; then
+            git config --global url."https://${GO_PRIVATE_TOKEN}@github.com/AO-Cyber-Systems/".insteadOf "https://github.com/aocybersystems/"
+            go env -w GOPRIVATE=github.com/aocybersystems/*
+          else
+            echo "WARN: GITOPS_PAT secret not set — private-module fetch will fail."
+          fi
+
+      # Full behavioral AUTH chain against the freshly built native coolwsd:
+      # AOID OIDC (fake IdP) -> WOPI token mint -> coolwsd doc session ->
+      # proof-verified CheckFileInfo/GetFile/PutFile -> alias_groups trust
+      # (positive + negative). Ports: 9980 coolwsd, 8091 wopi-host, 8092
+      # fake-aoid (8080 banned project-wide).
+      - name: WOPI host end-to-end (AUTH-01..04, native coolwsd on 9980 + wopi-host on 8091)
+        run: COOLWSD_MODE=native ./wopi-host/scripts/wopi-e2e.sh
