@@ -14,10 +14,12 @@ require (
 	github.com/aocybersystems/eden-platform-go v0.0.0-20260708235425-c5fd1ee7cedb
 	github.com/coreos/go-oidc/v3 v3.20.0
 	github.com/golang-jwt/jwt/v5 v5.3.1
+	github.com/gorilla/websocket v1.5.4-0.20250319132907-e064f32e3674
 	golang.org/x/oauth2 v0.36.0
 )
 
 require (
 	github.com/go-jose/go-jose/v4 v4.1.4 // indirect
+	golang.org/x/net v0.53.0 // indirect
 	golang.org/x/sync v0.20.0 // indirect
 )
