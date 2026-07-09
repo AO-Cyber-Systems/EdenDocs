@@ -228,6 +228,19 @@ real-AOID run of the WOPI host (it is not needed for the fake-aoid
 quickstart in §2, which fabricates its own discovery/token endpoints and
 needs no AOID-side registration at all).
 
+**Known AOID-side limitation (observed 2026-07-09, aoid v1.x local dev):**
+`CreateClient` works, and the WOPI host completes discovery + the redirect
+to `/oauth/authorize` against a real AOID — but AOID's *browser login* page
+is a federation IdP picker only (no local password/passkey first-login
+path), and registering an upstream OIDC IdP via
+`FederationAdminService.CreateExternalIdP` fails on that build with
+`"boot/federation: KMS Encrypt not wired in v1.0 boot"`
+(`aoid/internal/boot/federation_component.go` — a deliberate unwired shim;
+the underlying `crypto.WrapCipher.Encrypt` exists). Until the aoid repo
+wires that adapter, a human cannot complete an interactive login against a
+locally-booted AOID, so end-to-end human verification of this integration
+is blocked on the AOID side, not on EdenDocs.
+
 ## 5. coolwsd trust (production)
 
 The ONLY change coolwsd needs for this entire objective is config, not
