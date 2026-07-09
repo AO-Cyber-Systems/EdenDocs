@@ -13,3 +13,5 @@ STATE.md stays lean; this file grows over time.
 | Objective | Duration | Tasks | Files |
 |-----------|----------|-------|-------|
 | Objective 03-aoid-authentication-integration-oidc P01 | 25min | 3 tasks | 9 files |
+| Objective 03-aoid-authentication-integration-oidc P03 | ~30min | 3 tasks | 9 files |
+
