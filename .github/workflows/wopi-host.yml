@@ -1,0 +1,55 @@
+name: wopi-host
+on:
+  push:
+    branches: [eden-main]
+    paths:
+      - 'wopi-host/**'
+      - '.github/workflows/wopi-host.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: wopi-host-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  wopi-host:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.26'
+          cache-dependency-path: wopi-host/go.sum
+
+      # Proven pattern — copied verbatim from aofamily
+      # .github/workflows/browser.yml (private eden-platform-go fetch).
+      # If GITOPS_PAT is not configured on this repo, the warn branch fires
+      # and `go mod download` below fails loudly (user_setup gate).
+      - name: Configure private-module fetch
+        env:
+          GO_PRIVATE_TOKEN: ${{ secrets.GITOPS_PAT }}
+        run: |
+          if [ -n "$GO_PRIVATE_TOKEN" ]; then
+            git config --global url."https://${GO_PRIVATE_TOKEN}@github.com/AO-Cyber-Systems/".insteadOf "https://github.com/aocybersystems/"
+            go env -w GOPRIVATE=github.com/aocybersystems/*
+          else
+            echo "WARN: GITOPS_PAT secret not set — private-module fetch will fail."
+          fi
+
+      - name: Download modules
+        working-directory: wopi-host
+        run: go mod download
+
+      - name: Vet
+        working-directory: wopi-host
+        run: go vet ./...
+
+      - name: Build
+        working-directory: wopi-host
+        run: go build ./...
+
+      - name: Test (race)
+        working-directory: wopi-host
+        run: go test -race ./... -count=1
