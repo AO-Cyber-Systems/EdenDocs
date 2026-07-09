@@ -1,4 +1,4 @@
-github.com/aocybersystems/eden-platform-go v0.0.0-20260708235425-c5fd1ee7cedb h1:DsQpLPTRq0X8y8M1LCN2PTjZ23V000muoCNyx/y6CUQ=
-github.com/aocybersystems/eden-platform-go v0.0.0-20260708235425-c5fd1ee7cedb/go.mod h1:esTFXVE7UCboXa2PTKyV+jOhmmDJHNHlLdvB0+f4dvg=
+github.com/golang-jwt/jwt/v5 v5.3.1 h1:kYf81DTWFe7t+1VvL7eS+jKFVWaUnK9cB1qbwn63YCY=
+github.com/golang-jwt/jwt/v5 v5.3.1/go.mod h1:fxCRLWMO43lRc8nhHWY6LGqRcf+1gQWArsqaEUEa5bE=
 github.com/google/uuid v1.6.0 h1:NIvaJDMOsjHA8n1jAhLSgzrAzy1Hgr+hNrb57e+94F0=
 github.com/google/uuid v1.6.0/go.mod h1:TIyPZe4MgqvfeYDBFedMoGGpEw/LqOeaOT+nhxU+yHo=
