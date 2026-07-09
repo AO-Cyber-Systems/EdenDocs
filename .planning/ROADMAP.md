@@ -90,10 +90,14 @@ Jobs:
   2. The WOPI host correctly implements CheckFileInfo/GetFile/PutFile and mints short-lived WOPI `access_token`s that coolwsd accepts for document sessions
   3. The editor UI displays the authenticated user's name and avatar (and admin flag where applicable), sourced from CheckFileInfo's `UserFriendlyName`/avatar/`IsAdminUser` fields
   4. coolwsd trusts the reference WOPI host only because it is explicitly registered in `storage.wopi.alias_groups` (`mode="groups"`) with proof-key validation enabled, and no OIDC/OAuth code exists anywhere in `wsd/`
-**Plans**: TBD
+**Plans**: 5 TRDs (4 waves: 01 -> 02+03 parallel -> 04 -> 05)
 
 Jobs:
-- [ ] 03-01: TBD (planned by /devflow:plan-objective)
+- [ ] 03-01: wopi-host Go module scaffold — config, session/WOPI-token stores, document storage (03-01-wopi-host-scaffold-TRD.md) — wave 1
+- [ ] 03-02: AOID OIDC relying party via oidcrp + fake-AOID test IdP on 8092 (03-02-oidc-relying-party-TRD.md) — wave 2
+- [ ] 03-03: WOPI protocol surface — proof-key verification, discovery client, CheckFileInfo/GetFile/PutFile, launch page (03-03-wopi-protocol-surface-TRD.md) — wave 2
+- [ ] 03-04: Service wiring, alias_groups trust (mode="groups"), headless dual-mode e2e + CI (03-04-wiring-trust-e2e-TRD.md) — wave 3
+- [ ] 03-05: Runbook docs + human-verified real-AOID round trip (03-05-real-aoid-verification-TRD.md) — wave 4
 
 > **Non-linear dependency:** Objective 3 depends on Objective 1 (not
 > Objective 2) because the WOPI host is a separate deployable that shares no
