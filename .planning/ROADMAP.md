@@ -93,7 +93,7 @@ Jobs:
 **Plans**: 5 TRDs (4 waves: 01 -> 02+03 parallel -> 04 -> 05)
 
 Jobs:
-- [ ] 03-01: wopi-host Go module scaffold — config, session/WOPI-token stores, document storage (03-01-wopi-host-scaffold-TRD.md) — wave 1
+- [x] 03-01: wopi-host Go module scaffold — config, session/WOPI-token stores, document storage (03-01-wopi-host-scaffold-TRD.md) — wave 1 (completed 2026-07-09)
 - [ ] 03-02: AOID OIDC relying party via oidcrp + fake-AOID test IdP on 8092 (03-02-oidc-relying-party-TRD.md) — wave 2
 - [ ] 03-03: WOPI protocol surface — proof-key verification, discovery client, CheckFileInfo/GetFile/PutFile, launch page (03-03-wopi-protocol-surface-TRD.md) — wave 2
 - [ ] 03-04: Service wiring, alias_groups trust (mode="groups"), headless dual-mode e2e + CI (03-04-wiring-trust-e2e-TRD.md) — wave 3
@@ -155,7 +155,7 @@ must be decided before Objective 2 begins, per the note above).
 |-------|----------------|--------|-----------|
 | 1. From-Source Build Pipeline | 3/3 | Complete    | 2026-07-08 |
 | 2. EdenDocs Rebrand of the Web UI | 4/5 | In Progress|  |
-| 3. AOID Authentication Integration (OIDC) | 0/TBD | Not started | - |
+| 3. AOID Authentication Integration (OIDC) | 1/5 | In Progress|  |
 | 4. EdenDocs-Branded Container Images | 0/TBD | Not started | - |
 | 5. Upstream Tracking Workflow | 0/TBD | Not started | - |
 
