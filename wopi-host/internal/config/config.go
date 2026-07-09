@@ -147,6 +147,19 @@ func (c Config) Redacted() Config {
 	return redacted
 }
 
+// String implements fmt.Stringer with secrets ALWAYS redacted, so any
+// %v/%+v print of a Config — including an accidental one — never leaks
+// ClientSecret or StateHMACKey.
+func (c Config) String() string {
+	r := c.Redacted()
+	return fmt.Sprintf(
+		"{ListenAddr:%s PublicURL:%s WopiBaseURL:%s AOIDIssuer:%s ClientID:%s ClientSecret:%s StateHMACKey:%s CoolwsdURL:%s DataDir:%s WopiTokenTTL:%s RequireProof:%t}",
+		r.ListenAddr, r.PublicURL, r.WopiBaseURL, r.AOIDIssuer, r.ClientID,
+		r.ClientSecret, string(r.StateHMACKey), r.CoolwsdURL, r.DataDir,
+		r.WopiTokenTTL, r.RequireProof,
+	)
+}
+
 func resolveStateKey() ([]byte, error) {
 	if v := os.Getenv("EDENDOCS_WOPI_STATE_KEY"); v != "" {
 		key, err := base64.StdEncoding.DecodeString(v)
