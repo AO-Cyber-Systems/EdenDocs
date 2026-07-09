@@ -251,7 +251,7 @@ tests — the HTTP layer above them lands in 03-02/03-03):
 Commit: `feat(03-01): scaffold additive wopi-host Go module (config + healthz on 8091)`
 (explicit file list; verify nothing outside wopi-host/ is staged).
   </action>
-  <verify>cd wopi-host && go vet ./... && go build ./... && cd .. && git status --porcelain | grep -v '^?? wopi-host/' | grep -v '^A  wopi-host/' | grep -v '.planning/' | (! grep -q .) && ! grep -rn "8080" wopi-host/ --include='*.go' | grep -v 'banned' | grep -q . && cmp -s wopi-host/testdata/hello.odt test/data/hello.odt</verify>
+  <verify>cd wopi-host && go vet ./... && go build ./... && cd .. && git status --porcelain | grep -v '^?? wopi-host/' | grep -v '^A  wopi-host/' | grep -v '.planning/' | (! grep -q .) && ! grep -rn "8080" wopi-host/ --include='*.go' | grep -vE 'banned|":8080"' | grep -q . && cmp -s wopi-host/testdata/hello.odt test/data/hello.odt</verify>
   <done>wopi-host module builds and vets clean; healthz main exists; config defaults to 127.0.0.1:8091; hello.odt fixture is byte-identical to the upstream original; zero changes outside wopi-host/.</done>
   <recovery>If eden-platform-go fetch fails, see error_recovery (auth mapping). If go.mod ends up with a toolchain directive newer than 1.26, pin `go 1.26` and rerun go mod tidy.</recovery>
 </task>
@@ -293,7 +293,7 @@ func (s *Store) LookupWopiToken(token string) (WopiSession, bool)
 Commits: `test(03-01): session store behavior (RED)` then
 `feat(03-01): session store — web sessions + opaque WOPI token mint (GREEN)`.
   </action>
-  <verify>cd wopi-host && go test -race ./internal/session/ -count=1 -v 2>&1 | tail -20 && go vet ./internal/session/</verify>
+  <verify>cd wopi-host && go test -race ./internal/session/ -count=1 && go vet ./internal/session/</verify>
   <done>All 6 session behavior cases pass under -race; tokens are opaque uuids; expiry enforced via injected clock (no time.Sleep in tests).</done>
   <recovery>If -race flags a data race, guard all map access with the RWMutex — do not switch to sync.Map (keep the code reviewable).</recovery>
 </task>

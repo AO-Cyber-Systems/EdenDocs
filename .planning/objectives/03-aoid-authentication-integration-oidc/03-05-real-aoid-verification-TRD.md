@@ -183,7 +183,7 @@ docs/eden/WOPI-HOST.md sections:
    host; the WOPI access_token is a host-minted opaque uuid coolwsd echoes
    back) — research Pitfall 2, this is the doc's centerpiece.
 2. Quickstart — build, run against fake-aoid (exact commands, ports 8091/
-   8092), run the e2e (`./scripts/eden/wopi-e2e.sh`, both modes).
+   8092), run the e2e (`./wopi-host/scripts/wopi-e2e.sh`, both modes).
 3. Env reference — every EDENDOCS_WOPI_* var from internal/config with
    defaults and the docker-mode PublicURL/WopiBaseURL distinction.
 4. AOID client registration runbook — the CreateClient RPC parameters from

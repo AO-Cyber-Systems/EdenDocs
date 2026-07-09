@@ -9,7 +9,7 @@ files_modified:
   - wopi-host/cmd/e2e-probe/main.go
   - wopi-host/go.mod
   - wopi-host/go.sum
-  - scripts/eden/wopi-e2e.sh
+  - wopi-host/scripts/wopi-e2e.sh
   - .github/workflows/wopi-host.yml
   - .github/workflows/build.yml
 autonomous: true
@@ -23,7 +23,7 @@ user_setup:
 
 must_haves:
   truths:
-    - "One command (scripts/eden/wopi-e2e.sh) proves the full chain headlessly: OIDC login (fake AOID) → launch page mints a WOPI token → coolwsd opens a real document session → coolwsd calls back CheckFileInfo + GetFile with valid proof signatures → a forced save round-trips through PutFile"
+    - "One command (wopi-host/scripts/wopi-e2e.sh) proves the full chain headlessly: OIDC login (fake AOID) → launch page mints a WOPI token → coolwsd opens a real document session → coolwsd calls back CheckFileInfo + GetFile with valid proof signatures → a forced save round-trips through PutFile"
     - "coolwsd trusts the WOPI host ONLY because storage.wopi.alias_groups is set with mode=\"groups\" — proven positively (trusted WOPISrc loads) AND negatively (a WOPISrc on an unregistered host is rejected as unauthorized by the same coolwsd instance)"
     - "Zero commits in this objective touch wsd/ or browser/src — verified mechanically from git history (AUTH-04's no-OIDC-in-coolwsd clause)"
     - "A path-filtered wopi-host CI workflow (vet/build/test -race) is green on eden-main independently of the engine-tarball blocker; the build.yml e2e step is wired additively even though the pipeline is currently red upstream of it (BLOCKED-EXOGENOUS engine SIGSEGV — 02-05's blocker, not ours)"
@@ -34,14 +34,14 @@ must_haves:
     - path: "wopi-host/cmd/e2e-probe/main.go"
       provides: "Headless coolwsd WebSocket client: coolclient handshake + load + forced save; positive and expect-unauthorized modes"
       contains: "coolclient"
-    - path: "scripts/eden/wopi-e2e.sh"
+    - path: "wopi-host/scripts/wopi-e2e.sh"
       provides: "Dual-mode (native CI / local docker) end-to-end orchestration with fail() log-surfacing and log-grep assertions"
       contains: "alias_groups"
     - path: ".github/workflows/wopi-host.yml"
       provides: "Engine-independent Go CI for wopi-host (private-module fetch via GITOPS_PAT, vet/build/test -race)"
       contains: "GOPRIVATE"
   key_links:
-    - from: "scripts/eden/wopi-e2e.sh"
+    - from: "wopi-host/scripts/wopi-e2e.sh"
       to: "coolwsd runtime config"
       via: "native mode: --o:storage.wopi.alias_groups[@mode]=groups --o:storage.wopi.alias_groups.group[0].host=http://127.0.0.1:8091 --o:storage.wopi.alias_groups.group[0].host[@allow]=true (keys verified against wsd/HostUtil.cpp parse loop); docker mode: -e aliasgroup1"
       pattern: "alias_groups\\[@mode\\]=groups"
@@ -49,7 +49,7 @@ must_haves:
       to: "coolwsd /cool/<enc>/ws WebSocket"
       via: "URL + handshake mirroring browser/js/global.js makeDocAndWopiSrcUrl and browser/src/app/socket.ts (coolclient → load url=)"
       pattern: "load url="
-    - from: "scripts/eden/wopi-e2e.sh"
+    - from: "wopi-host/scripts/wopi-e2e.sh"
       to: "wopi-host structured logs"
       via: "greps the 03-03 log-line contract: 'wopi: CheckFileInfo … status=200', 'wopi: GetFile … status=200', 'wopi: PutFile … status=200', 'proof: verified ok'"
       pattern: "wopi: PutFile"
@@ -71,7 +71,7 @@ engine-tarball blocker.
 Purpose: this TRD is where "coolwsd accepts the minted token for a real
 document session" stops being a claim and becomes a grep-able log line.
 
-Output: runnable wopi-host binary, e2e-probe, scripts/eden/wopi-e2e.sh, a
+Output: runnable wopi-host binary, e2e-probe, wopi-host/scripts/wopi-e2e.sh, a
 green wopi-host.yml workflow, an additive build.yml e2e step, and a PASSING
 local e2e run recorded in the SUMMARY.
 </objective>
@@ -81,7 +81,7 @@ wopi-host/
 ├── cmd/wopi-host/main.go        ← MODIFY (full wiring)
 ├── cmd/e2e-probe/main.go        ← CREATE
 ├── go.mod / go.sum              ← MODIFY (add gorilla/websocket for the probe)
-scripts/eden/wopi-e2e.sh         ← CREATE (Eden-owned script dir, additive)
+wopi-host/scripts/wopi-e2e.sh         ← CREATE (Eden-owned script dir, additive)
 .github/workflows/wopi-host.yml  ← CREATE
 .github/workflows/build.yml      ← MODIFY (additive steps only: setup-go + private-module config + e2e step after verify-branding)
 </file_tree>
@@ -341,8 +341,8 @@ Commits: `feat(03-04): wire wopi-host service (all routes on 8091)` /
 </task>
 
 <task type="auto">
-  <name>Task 2: scripts/eden/wopi-e2e.sh — dual-mode end-to-end + local PASS</name>
-  <files>scripts/eden/wopi-e2e.sh</files>
+  <name>Task 2: wopi-host/scripts/wopi-e2e.sh — dual-mode end-to-end + local PASS</name>
+  <files>wopi-host/scripts/wopi-e2e.sh</files>
   <action>
 Write the orchestration script implementing test-list 1-10. Structure:
 - Mode select: COOLWSD_MODE=${COOLWSD_MODE:-auto} → "native" if ./coolwsd
@@ -366,12 +366,12 @@ Write the orchestration script implementing test-list 1-10. Structure:
 - Zero-upstream-diff gate: `[ -z "$(git status --porcelain wsd/ browser/)" ]`.
 - Final line: `echo "WOPI E2E PASSED: OIDC → launch → CheckFileInfo/GetFile/PutFile → proof + alias_groups trust (mode=$MODE)"`.
 Then RUN it locally in docker mode until green:
-`COOLWSD_MODE=docker ./scripts/eden/wopi-e2e.sh` — this local PASS is the
+`COOLWSD_MODE=docker ./wopi-host/scripts/wopi-e2e.sh` — this local PASS is the
 verification of record while build.yml is engine-blocked. Capture the full
 output for the SUMMARY.
 Commit: `feat(03-04): dual-mode WOPI e2e — OIDC round trip + coolwsd trust proofs`.
   </action>
-  <verify>bash -n scripts/eden/wopi-e2e.sh && COOLWSD_MODE=docker ./scripts/eden/wopi-e2e.sh 2>&1 | tee /tmp/wopi-e2e-local.txt | tail -5 && grep -q 'WOPI E2E PASSED' /tmp/wopi-e2e-local.txt && ! grep -n '8080' scripts/eden/wopi-e2e.sh | grep -vi 'never\|banned' | grep -q . && ! git status --porcelain | grep -E '^.. (wsd/|browser/|proof_key)' | grep -q .</verify>
+  <verify>bash -n wopi-host/scripts/wopi-e2e.sh && COOLWSD_MODE=docker ./wopi-host/scripts/wopi-e2e.sh 2>&1 | tee /tmp/wopi-e2e-local.txt | tail -5 && grep -q 'WOPI E2E PASSED' /tmp/wopi-e2e-local.txt && ! grep -n '8080' wopi-host/scripts/wopi-e2e.sh | grep -vi 'never\|banned' | grep -q . && ! git status --porcelain | grep -E '^.. (wsd/|browser/|proof_key)' | grep -q .</verify>
   <done>Local docker-mode run prints WOPI E2E PASSED with all 10 assertions (positive AND negative trust, proof verified, PutFile round trip); no proof_key or upstream-tree residue in git status.</done>
   <recovery>Work the error_recovery ladder in order (unauthorized → alias config; proof REJECTED → URL reconstruction; no CheckFileInfo → reachability; WS non-101 → URL encoding). If docker networking on this mac blocks host.docker.internal, document and fall back to running the container with --add-host=host.docker.internal:host-gateway.</recovery>
 </task>
@@ -381,7 +381,7 @@ Commit: `feat(03-04): dual-mode WOPI e2e — OIDC round trip + coolwsd trust pro
   <files>.github/workflows/wopi-host.yml, .github/workflows/build.yml</files>
   <action>
 1. .github/workflows/wopi-host.yml: on push to eden-main +
-   workflow_dispatch, paths: [wopi-host/**, scripts/eden/wopi-e2e.sh,
+   workflow_dispatch, paths: [wopi-host/**, wopi-host/scripts/wopi-e2e.sh,
    .github/workflows/wopi-host.yml]; job: ubuntu-latest,
    actions/checkout@v4, actions/setup-go@v5 (go-version '1.26',
    cache-dependency-path: wopi-host/go.sum), the VERBATIM private-module
@@ -391,7 +391,7 @@ Commit: `feat(03-04): dual-mode WOPI e2e — OIDC round trip + coolwsd trust pro
 2. build.yml — APPEND after the verify-branding step (purely additive):
    setup-go (same pins), the private-module step, and
    `- name: WOPI host end-to-end (AUTH-01..04, native coolwsd on 9980 + wopi-host on 8091)`
-   running `./scripts/eden/wopi-e2e.sh` with COOLWSD_MODE=native.
+   running `./wopi-host/scripts/wopi-e2e.sh` with COOLWSD_MODE=native.
 3. Ensure GITOPS_PAT exists on the repo (user_setup). If the user provides
    the token value in-session: `gh secret set GITOPS_PAT --repo
    AO-Cyber-Systems/EdenDocs`. If not available, note it and proceed — the
@@ -406,7 +406,7 @@ Commit: `feat(03-04): dual-mode WOPI e2e — OIDC round trip + coolwsd trust pro
 Commits: `ci(03-04): wopi-host workflow (vet/build/test, private-module fetch)` /
 `ci(03-04): append WOPI e2e step to build pipeline`.
   </action>
-  <verify>gh run list --workflow=wopi-host.yml --branch eden-main --limit 1 --json conclusion --jq '.[0].conclusion' | grep -q success && git diff HEAD~2 -- .github/workflows/build.yml | grep '^-' | grep -v '^---' | (! grep -q .)</verify>
+  <verify>gh run list --workflow=wopi-host.yml --branch eden-main --limit 1 --json conclusion --jq '.[0].conclusion' | grep -q success && git diff HEAD~2 -- .github/workflows/build.yml | grep '^-' | grep -v '^---' | (! grep -q .) && ! git log --name-only --pretty=format: 04703653ab2..HEAD | grep -E '^(wsd|browser/src)/' | grep -q .</verify>
   <done>wopi-host.yml is green on eden-main; build.yml diff is purely additive (no existing lines removed/modified); build.yml redness (if any) is confirmed to be the pre-existing engine smoke failure, documented in the SUMMARY with run IDs.</done>
   <recovery>If wopi-host.yml fails on the private module: GITOPS_PAT gate (user_setup) — surface and stop rather than vendoring. ≤4 fix cycles on anything else; diagnose from logs before each fix commit.</recovery>
 </task>
@@ -414,13 +414,13 @@ Commits: `ci(03-04): wopi-host workflow (vet/build/test, private-module fetch)` 
 </tasks>
 
 <validation_gates>
-<lint>cd wopi-host && go vet ./... && bash -n scripts/eden/wopi-e2e.sh</lint>
+<lint>cd wopi-host && go vet ./... && bash -n scripts/wopi-e2e.sh</lint>
 <test>cd wopi-host && go test -race ./... -count=1</test>
 <build>gh run list --workflow=wopi-host.yml --branch eden-main --limit 1 --json conclusion --jq '.[0].conclusion' | grep -q success</build>
 </validation_gates>
 
 <verification>
-- `COOLWSD_MODE=docker ./scripts/eden/wopi-e2e.sh` prints WOPI E2E PASSED
+- `COOLWSD_MODE=docker ./wopi-host/scripts/wopi-e2e.sh` prints WOPI E2E PASSED
   locally (verification of record while the engine blocker holds).
 - Positive AND negative trust proofs both asserted in the same run
   (alias_groups is the only reason coolwsd talks to us — AUTH-04).

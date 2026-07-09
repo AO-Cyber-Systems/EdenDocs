@@ -28,7 +28,7 @@ must_haves:
       provides: "In-process fake AOID IdP: discovery, JWKS, /oauth/authorize (auto-approve), /oauth/token (RS256 id_token with nonce), /oauth/userinfo"
       contains: "openid-configuration"
     - path: "wopi-host/cmd/fake-aoid/main.go"
-      provides: "Standalone fake IdP binary (default 127.0.0.1:8092) reused by scripts/eden/wopi-e2e.sh in TRD 03-04"
+      provides: "Standalone fake IdP binary (default 127.0.0.1:8092) reused by wopi-host/scripts/wopi-e2e.sh in TRD 03-04"
       contains: "8092"
   key_links:
     - from: "wopi-host/internal/oidcauth/oidcauth.go"
@@ -275,7 +275,7 @@ Routes (Go 1.22 pattern mux):
 
 cmd/fake-aoid/main.go: net.Listen on EDENDOCS_FAKE_AOID_ADDR (default
 "127.0.0.1:8092"), SetIssuer("http://"+addr), serve, log the issuer URL.
-Used by scripts/eden/wopi-e2e.sh in TRD 03-04.
+Used by wopi-host/scripts/wopi-e2e.sh in TRD 03-04.
 
 Sign JWTs with golang-jwt/jwt/v5 (already in the dependency graph via
 eden-platform-go — same lib AOID itself mints with).
@@ -342,7 +342,7 @@ Commits: `test(03-02): OIDC RP flow behavior against fake AOID (RED)` then
 `feat(03-02): AOID OIDC relying party via oidcrp (GREEN)` then
 `chore(03-02): go mod tidy (go-oidc/oauth2 direct)`.
   </action>
-  <verify>cd wopi-host && go test -race ./internal/oidcauth/ -count=1 -v 2>&1 | tail -25 && go vet ./... && go build ./... && ! grep -rn "NewProvider\|provider.Verifier(" internal/oidcauth/oidcauth.go | grep -v "Cache" | grep -q .</verify>
+  <verify>cd wopi-host && go test -race ./internal/oidcauth/ -count=1 && go vet ./... && go build ./... && ! grep -rn "NewProvider\|provider.Verifier(" internal/oidcauth/oidcauth.go | grep -v "Cache" | grep -q .</verify>
   <done>All 10 flow cases green under -race; provider/verifier constructed only via oidcrp caches at NewAuthenticator time; claims mapping implements the exact AUTH-03 fallback chain; IsAdmin hard-false with pitfall comment.</done>
   <recovery>See error_recovery for the three canonical go-oidc verification failures. If SameSite handling breaks the cookie-jar test client, assert the Set-Cookie attributes directly instead of relying on jar semantics.</recovery>
 </task>
