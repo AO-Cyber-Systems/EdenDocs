@@ -19,4 +19,5 @@ STATE.md stays lean; this file grows over time.
 | Objective 03-aoid-authentication-integration-oidc P03-04 | 2h | 3 tasks | 7 files |
 | Objective 03 P05 | ~3h | 2 tasks | 6 files |
 | Objective 04 P02 | 3min | 2 tasks | 3 files |
+| Objective 04-edendocs-branded-container-images P04 | 30min | 2 tasks | 2 files |
 

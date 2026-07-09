@@ -86,9 +86,9 @@ Which objectives cover which requirements. Updated during roadmap creation.
 | AUTH-02 | Objective 3 - AOID Authentication Integration (OIDC) | Complete |
 | AUTH-03 | Objective 3 - AOID Authentication Integration (OIDC) | Complete |
 | AUTH-04 | Objective 3 - AOID Authentication Integration (OIDC) | Complete |
-| DIST-01 | Objective 4 - EdenDocs-Branded Container Images | Pending |
-| DIST-02 | Objective 4 - EdenDocs-Branded Container Images | Pending |
-| DIST-03 | Objective 4 - EdenDocs-Branded Container Images | Pending |
+| DIST-01 | Objective 4 - EdenDocs-Branded Container Images | Code-complete (04-04 authored); CI green-run proof pending user-approved push |
+| DIST-02 | Objective 4 - EdenDocs-Branded Container Images | Code-complete (04-04 authored); CI green-run proof pending user-approved push |
+| DIST-03 | Objective 4 - EdenDocs-Branded Container Images | Code-complete (04-04 authored); CI green-run proof pending user-approved push |
 | UPST-01 | Objective 5 - Upstream Tracking Workflow | Pending |
 | UPST-02 | Objective 5 - Upstream Tracking Workflow | Pending |
 
