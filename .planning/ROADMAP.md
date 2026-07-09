@@ -118,7 +118,7 @@ Jobs:
 TRDs:
 - [x] 04-01-release-build-engine-pin-TRD.md — non-debug release build + pinned/sha256-verified engine snapshot (DIST-01) — wave 1
 - [x] 04-02-branded-dockerfile-verify-caps-TRD.md — additive docker/eden/Dockerfile, 3-stage assemble→verify-caps→runtime (DIST-01, DIST-02) — wave 1
-- [ ] 04-03-reverse-proxy-smoke-harness-TRD.md — >60s WebSocket survival through the verbatim nginx reverse proxy (DIST-02) — wave 1
+- [x] 04-03-reverse-proxy-smoke-harness-TRD.md — >60s WebSocket survival through the verbatim nginx reverse proxy (DIST-02) — wave 1
 - [ ] 04-04-docker-publish-cosign-TRD.md — docker-publish.yml: build → boot-health → proxy-smoke → trivy → push → keyless cosign + LABELs + checklist rows (DIST-01, DIST-02, DIST-03) — wave 2
 
 ### Objective 5: Upstream Tracking Workflow
@@ -159,7 +159,7 @@ must be decided before Objective 2 begins, per the note above).
 | 1. From-Source Build Pipeline | 3/3 | Complete    | 2026-07-08 |
 | 2. EdenDocs Rebrand of the Web UI | 4/5 | In Progress|  |
 | 3. AOID Authentication Integration (OIDC) | 5/5 | Complete   | 2026-07-09 |
-| 4. EdenDocs-Branded Container Images | 2/4 | In Progress |  |
+| 4. EdenDocs-Branded Container Images | 3/4 | In Progress |  |
 | 5. Upstream Tracking Workflow | 0/TBD | Not started | - |
 
 ---
