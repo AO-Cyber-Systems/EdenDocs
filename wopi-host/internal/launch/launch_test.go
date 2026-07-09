@@ -45,8 +45,8 @@ type env struct {
 }
 
 // newEnv wires a launch handler with an injected identity stub — launch
-// must never import oidcauth (TRD decoupling rule); TRD 03-04 injects the
-// real oidcauth context helper in production.
+// must never import the OIDC RP package (TRD decoupling rule); TRD 03-04
+// injects the real request-context identity helper in production.
 func newEnv(t *testing.T, identityFrom func(*http.Request) (session.Identity, bool)) *env {
 	t.Helper()
 
