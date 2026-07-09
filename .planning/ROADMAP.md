@@ -113,10 +113,13 @@ Jobs:
   1. A container image builds successfully from the `docker/from-source/{Ubuntu,Debian}` pattern, embedding the prebuilt engine, EdenDocs-built `wsd`/`browser`, and `eden-branding` assets — not the `from-packages` repackage path
   2. The image's `verify-caps` capability-check build stage still passes, and a document session held open through a real reverse proxy survives longer than 60 seconds (not just direct `127.0.0.1:9980` access)
   3. Published images are signed with cosign and available in the AO-Cyber-Systems registry, carrying EdenDocs `LABEL` metadata
-**Plans**: TBD
+**Plans**: 4 TRDs (2 waves: 04-01 + 04-02 + 04-03 parallel, then 04-04)
 
-Jobs:
-- [ ] 04-01: TBD (planned by /devflow:plan-objective)
+TRDs:
+- [x] 04-01-release-build-engine-pin-TRD.md — non-debug release build + pinned/sha256-verified engine snapshot (DIST-01) — wave 1
+- [ ] 04-02-branded-dockerfile-verify-caps-TRD.md — additive docker/eden/Dockerfile, 3-stage assemble→verify-caps→runtime (DIST-01, DIST-02) — wave 1
+- [ ] 04-03-reverse-proxy-smoke-harness-TRD.md — >60s WebSocket survival through the verbatim nginx reverse proxy (DIST-02) — wave 1
+- [ ] 04-04-docker-publish-cosign-TRD.md — docker-publish.yml: build → boot-health → proxy-smoke → trivy → push → keyless cosign + LABELs + checklist rows (DIST-01, DIST-02, DIST-03) — wave 2
 
 ### Objective 5: Upstream Tracking Workflow
 **Goal**: EdenDocs has a written, owned discipline for staying mergeable against the fast-moving `online.mirror` indefinitely — a fixed merge cadence, an explicit branch-tracking decision, and a divergence allowlist checked at every merge.
@@ -156,7 +159,7 @@ must be decided before Objective 2 begins, per the note above).
 | 1. From-Source Build Pipeline | 3/3 | Complete    | 2026-07-08 |
 | 2. EdenDocs Rebrand of the Web UI | 4/5 | In Progress|  |
 | 3. AOID Authentication Integration (OIDC) | 5/5 | Complete   | 2026-07-09 |
-| 4. EdenDocs-Branded Container Images | 0/TBD | Not started | - |
+| 4. EdenDocs-Branded Container Images | 1/4 | In Progress |  |
 | 5. Upstream Tracking Workflow | 0/TBD | Not started | - |
 
 ---
