@@ -274,3 +274,6 @@ qt/translations/*.qm
 # This needs to stay at the end, to honor engine/.gitignore:
 !engine/**
 /engine/translations
+
+# DevFlow ephemeral skill marker — must never be committed
+.planning/.skill-active
