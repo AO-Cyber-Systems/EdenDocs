@@ -63,7 +63,7 @@ jobs:
       # this line — never reorder or modify the steps above. ---
       - uses: actions/setup-go@v5
         with:
-          go-version: '1.26'
+          go-version: '1.27.1'
           cache-dependency-path: wopi-host/go.sum
 
       # Proven pattern — copied verbatim from aofamily
