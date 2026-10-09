@@ -1,6 +1,6 @@
 module github.com/AO-Cyber-Systems/EdenDocs/wopi-host
 
-go 1.26.1
+go 1.27.1
 
 // NOTE: github.com/aocybersystems/eden-platform-go is a PRIVATE org module
 // (real repo: github.com/AO-Cyber-Systems/eden-platform-go). Building
