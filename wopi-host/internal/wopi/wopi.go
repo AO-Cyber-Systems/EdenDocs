@@ -32,10 +32,10 @@ import (
 	"sync"
 	"time"
 
-	"github.com/AO-Cyber-Systems/EdenDocs/wopi-host/internal/coolwsd"
-	"github.com/AO-Cyber-Systems/EdenDocs/wopi-host/internal/proof"
-	"github.com/AO-Cyber-Systems/EdenDocs/wopi-host/internal/session"
-	"github.com/AO-Cyber-Systems/EdenDocs/wopi-host/internal/storage"
+	"go.aocyber.ai/edendocs/wopi-host/internal/coolwsd"
+	"go.aocyber.ai/edendocs/wopi-host/internal/proof"
+	"go.aocyber.ai/edendocs/wopi-host/internal/session"
+	"go.aocyber.ai/edendocs/wopi-host/internal/storage"
 )
 
 // maxPutFileBytes caps a PutFile request body (defense against unbounded
