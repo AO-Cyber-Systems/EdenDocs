@@ -21,12 +21,12 @@ import (
 	"testing"
 	"time"
 
-	oidcrp "github.com/aocybersystems/eden-platform-go/platform/oidcrp"
+	oidcrp "go.aocyber.ai/eden-platform-go/platform/oidcrp"
 
-	"github.com/AO-Cyber-Systems/EdenDocs/wopi-host/internal/config"
-	"github.com/AO-Cyber-Systems/EdenDocs/wopi-host/internal/oidcauth"
-	"github.com/AO-Cyber-Systems/EdenDocs/wopi-host/internal/oidctest"
-	"github.com/AO-Cyber-Systems/EdenDocs/wopi-host/internal/session"
+	"go.aocyber.ai/edendocs/wopi-host/internal/config"
+	"go.aocyber.ai/edendocs/wopi-host/internal/oidcauth"
+	"go.aocyber.ai/edendocs/wopi-host/internal/oidctest"
+	"go.aocyber.ai/edendocs/wopi-host/internal/session"
 )
 
 // --- test harness -----------------------------------------------------

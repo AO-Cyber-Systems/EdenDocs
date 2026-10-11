@@ -28,7 +28,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/AO-Cyber-Systems/EdenDocs/wopi-host/internal/proof"
+	"go.aocyber.ai/edendocs/wopi-host/internal/proof"
 )
 
 // ErrUnknownExtension is returned by URLSrc when no <action> in the

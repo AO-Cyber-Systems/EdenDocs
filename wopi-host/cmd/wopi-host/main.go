@@ -39,13 +39,13 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/AO-Cyber-Systems/EdenDocs/wopi-host/internal/config"
-	"github.com/AO-Cyber-Systems/EdenDocs/wopi-host/internal/coolwsd"
-	"github.com/AO-Cyber-Systems/EdenDocs/wopi-host/internal/launch"
-	"github.com/AO-Cyber-Systems/EdenDocs/wopi-host/internal/oidcauth"
-	"github.com/AO-Cyber-Systems/EdenDocs/wopi-host/internal/session"
-	"github.com/AO-Cyber-Systems/EdenDocs/wopi-host/internal/storage"
-	"github.com/AO-Cyber-Systems/EdenDocs/wopi-host/internal/wopi"
+	"go.aocyber.ai/edendocs/wopi-host/internal/config"
+	"go.aocyber.ai/edendocs/wopi-host/internal/coolwsd"
+	"go.aocyber.ai/edendocs/wopi-host/internal/launch"
+	"go.aocyber.ai/edendocs/wopi-host/internal/oidcauth"
+	"go.aocyber.ai/edendocs/wopi-host/internal/session"
+	"go.aocyber.ai/edendocs/wopi-host/internal/storage"
+	"go.aocyber.ai/edendocs/wopi-host/internal/wopi"
 )
 
 // discoveryCacheTTL is the production default for the coolwsd discovery

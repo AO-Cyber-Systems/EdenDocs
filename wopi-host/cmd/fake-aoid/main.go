@@ -23,7 +23,7 @@ import (
 
 	"net/http"
 
-	"github.com/AO-Cyber-Systems/EdenDocs/wopi-host/internal/oidctest"
+	"go.aocyber.ai/edendocs/wopi-host/internal/oidctest"
 )
 
 // defaultAddr is 127.0.0.1:8092 — never 8080 (banned project-wide), never

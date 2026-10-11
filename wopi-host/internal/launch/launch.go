@@ -34,9 +34,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/AO-Cyber-Systems/EdenDocs/wopi-host/internal/coolwsd"
-	"github.com/AO-Cyber-Systems/EdenDocs/wopi-host/internal/session"
-	"github.com/AO-Cyber-Systems/EdenDocs/wopi-host/internal/storage"
+	"go.aocyber.ai/edendocs/wopi-host/internal/coolwsd"
+	"go.aocyber.ai/edendocs/wopi-host/internal/session"
+	"go.aocyber.ai/edendocs/wopi-host/internal/storage"
 )
 
 // Config carries the launch handler's two wiring knobs.

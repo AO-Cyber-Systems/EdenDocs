@@ -10,7 +10,7 @@
 
 // Package oidcauth is the AOID OIDC relying-party surface of the WOPI
 // host: /login, /callback, /logout, and a RequireLogin middleware. It is
-// a thin consumer of github.com/aocybersystems/eden-platform-go's
+// a thin consumer of go.aocyber.ai/eden-platform-go's
 // platform/oidcrp package — the org mandate is to NEVER hand-roll OIDC
 // state/nonce/PKCE handling (3-RESEARCH.md).
 //
@@ -38,10 +38,10 @@ import (
 	"github.com/google/uuid"
 	"golang.org/x/oauth2"
 
-	oidcrp "github.com/aocybersystems/eden-platform-go/platform/oidcrp"
+	oidcrp "go.aocyber.ai/eden-platform-go/platform/oidcrp"
 
-	"github.com/AO-Cyber-Systems/EdenDocs/wopi-host/internal/config"
-	"github.com/AO-Cyber-Systems/EdenDocs/wopi-host/internal/session"
+	"go.aocyber.ai/edendocs/wopi-host/internal/config"
+	"go.aocyber.ai/edendocs/wopi-host/internal/session"
 )
 
 const (

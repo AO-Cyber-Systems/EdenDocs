@@ -21,10 +21,10 @@ import (
 	"testing"
 	"time"
 
-	"github.com/AO-Cyber-Systems/EdenDocs/wopi-host/internal/config"
-	"github.com/AO-Cyber-Systems/EdenDocs/wopi-host/internal/oidcauth"
-	"github.com/AO-Cyber-Systems/EdenDocs/wopi-host/internal/oidctest"
-	"github.com/AO-Cyber-Systems/EdenDocs/wopi-host/internal/session"
+	"go.aocyber.ai/edendocs/wopi-host/internal/config"
+	"go.aocyber.ai/edendocs/wopi-host/internal/oidcauth"
+	"go.aocyber.ai/edendocs/wopi-host/internal/oidctest"
+	"go.aocyber.ai/edendocs/wopi-host/internal/session"
 )
 
 // newTLSHarness is newHarness with the fake IdP served over TLS on a
